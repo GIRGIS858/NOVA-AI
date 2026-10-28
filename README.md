@@ -11,6 +11,7 @@ A new Arabic/English platform for building websites through conversation. This r
 - A dark workspace with compact navigation, an iridescent orb, and three bilingual suggestions that preserve your draft.
 - A studio that persists the brief and notes, accurately labeling generation and previews as unavailable.
 - Product status and milestone documentation.
+- Internal source-version service: immutable snapshots, structured file edits, restore, ownership/concurrency checks, and resource limits. UI/API integration is the next stage.
 
 **Not implemented:** AI calls, generated source files, sandbox execution, previews, deployment, shared teams, credits, payments, email verification, and password recovery. Do not use this development release for sensitive data or public production signups.
 

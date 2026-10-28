@@ -27,6 +27,8 @@ Verified in this environment: TypeScript check, production build, 3 ownership/va
 
 Next vertical slice: one user prompt → an authorized run → structured file operations → a stored source version → isolated build → verified preview.
 
+Completed prerequisite: owner-scoped immutable source versions, structured writes/deletes, restoration, transactional stale-base protection, portable path validation, and file/byte/history limits. The service is internal and does not yet expose generation or execution. See `SOURCE-VERSIONS.md`. Latest checks: 27 unit tests, 4 browser workflows, types, production build, and repeatable migrations all passed.
+
 Required decisions: AI provider and reachable endpoint, runner infrastructure, secrets configuration, preview access mechanism. Introduce provider and runner interfaces, bounded execution, cancellation, scoped file paths, and failure recovery. Keep tests with fake providers separate from actual-provider validation.
 
 ## 03 — Reliability and source versions

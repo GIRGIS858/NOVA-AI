@@ -24,9 +24,23 @@ Validation: type check, 3 unit tests, production build, and all 3 browser workfl
 
 Merged the separate session's `595d088` workspace redesign into this branch. Its accessible, append-only suggestion composer, pending save state, scoped workspace theme, navigation, and keyboard/mobile/XSS checks are preserved. The public dark home, session draft privacy fixes, dedicated browser runner, and CI configuration are also retained. Styles are scoped to prevent cross-route leaks. The combined tree passed TypeScript, all 3 unit tests, the production build, and all 4 browser workflows. Always fetch before pushing: more than one session may be active.
 
-## Current task
+## Latest backend checkpoint — source versions
 
-Next: implement and test owner-scoped immutable source versions and structured file changes before adding AI orchestration. This milestone has no generated code execution, active provider integration, credits, or publication yet. Continue with source-version storage, path validation, optimistic concurrency, and meaningful authorization tests.
+Implemented the internal `sourceVersionStore` in `src/lib/versions.ts`, exported as `sourceVersions` from `db.ts`. Explicit schema setup runs in `npm run db:migrate`. It supports immutable snapshots, write/delete changes, restore-as-new-version, ownership checks, optimistic concurrency, transactional rollback, portable path validation, and bounded UTF-8/file/history sizes. Metadata listing does not load all file bodies.
+
+Latest validation: 27 unit tests, 4 browser workflows, production build, and TypeScript passed. Source schema setup succeeded twice. Browser tests use fresh isolated databases and preserve both sessions' coverage. See `docs/SOURCE-VERSIONS.md` for the API and security boundaries.
+
+There are no public source mutation endpoints or source editor controls yet. This module does not invoke an AI provider, write files outside SQLite, execute code, create previews, or publish sites.
+
+## Next task — authorized generation runs
+
+1. Add durable, owner-scoped generation runs and an explicit state machine (queued/running/checking/ready/failed/cancelled), idempotency, cancellation, and stale-run reconciliation.
+2. Add a provider adapter accepting a configured endpoint/model with server-side secrets. No provider credentials have been configured or validated. Inspect environment bindings before requesting setup; never put keys in chat.
+3. Capture the source base version before a model request. Validate structured output through `sourceVersions.commit`; reject conflicts rather than replacing newer edits.
+4. Build a runner abstraction with real process/container isolation, resource/network boundaries, and verified readiness. Do not execute generated code in the Next.js server.
+5. Only expose generation and previews when actual-provider and actual-runner checks pass. Fake-provider tests are useful but must remain clearly distinguished.
+
+Billing, shared teams, public deployment, email recovery/verification, and production hardening remain planned. No fixed commercial pricing has been enabled.
 
 ## Start here
 
