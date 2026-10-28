@@ -13,6 +13,16 @@
 
 Verified in this environment: TypeScript check, production build, 3 ownership/validation unit tests, and 2 end-to-end browser workflows. The browser checks exercise real signup/login, persisted projects and notes, cross-user rejection, signout, mobile layout, and persistent language switching. Local schema setup was run twice successfully. Desktop, mobile, and studio screenshots were visually inspected.
 
+## 01b — Dark workspace and continuity (complete)
+
+- [x] Dark/cyan reference-inspired home, orb, icon rail, prompt suggestions.
+- [x] Consistent dashboard/studio/login palette and mobile layouts.
+- [x] Brief persistence through sign-in without private text in URLs.
+- [x] Repeated redirect query validation.
+- [x] Isolated portable browser runner and GitHub Actions workflow.
+- [x] Three complete browser workflows passed after the redesign.
+- [x] Screenshot evidence and continuation instructions.
+
 ## 02 — A real building loop
 
 Next vertical slice: one user prompt → an authorized run → structured file operations → a stored source version → isolated build → verified preview.

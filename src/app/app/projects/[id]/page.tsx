@@ -16,13 +16,14 @@ import { projects } from "@/lib/db";
 import { getLocale } from "@/lib/locale";
 import { saveMessage } from "@/app/actions";
 import { DeleteProject } from "@/components/delete-project";
+import { ClearCreatedDraft } from "@/components/brief-input";
 export const metadata = { title: "Project studio" };
 export default async function Studio({
   params,
   searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ error?: string }>;
+  searchParams: Promise<{ error?: string; created?: string }>;
 }) {
   const user = await requireUser();
   const { id } = await params;
@@ -34,6 +35,7 @@ export default async function Studio({
   const messages = projects.messages(user.id, id);
   return (
     <main className="studio">
+      {q.created === "1" && <ClearCreatedDraft brief={project.brief} />}
       <div className="studio-toolbar">
         <div className="header-actions">
           <Link className="button ghost small" href="/app">

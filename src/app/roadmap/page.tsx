@@ -111,7 +111,7 @@ export default async function Roadmap() {
             </article>
           ))}
         </div>
-        <section className="status-notice">
+        <section className="status-notice" id="availability">
           <h2>
             {ar ? "قبل استخدام بيانات مهمة" : "Before using important data"}
           </h2>

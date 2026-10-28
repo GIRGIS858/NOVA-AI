@@ -12,20 +12,18 @@ import { session } from "@/lib/auth";
 import { getLocale } from "@/lib/locale";
 import { projects } from "@/lib/db";
 import { createProject } from "@/app/actions";
+import { BriefInput } from "@/components/brief-input";
 export const metadata = { title: "Workspace" };
 export default async function Dashboard({
   searchParams,
 }: {
-  searchParams: Promise<{ idea?: string; error?: string }>;
+  searchParams: Promise<{ error?: string | string[] }>;
 }) {
   const q = await searchParams;
   const locale = await getLocale();
   const ar = locale === "ar";
   const current = await session();
-  if (!current)
-    redirect(
-      `/login?next=${encodeURIComponent("/app" + (q.idea ? "?idea=" + encodeURIComponent(q.idea.slice(0, 8000)) : ""))}`,
-    );
+  if (!current) redirect("/login?next=%2Fapp");
   const items = projects.list(current.user.id);
   return (
     <main className="dashboard section-shell">
@@ -78,18 +76,7 @@ export default async function Dashboard({
           </label>
           <label>
             {ar ? "الفكرة والأهداف" : "Your idea and goals"}
-            <textarea
-              name="brief"
-              required
-              minLength={10}
-              maxLength={8000}
-              defaultValue={q.idea?.slice(0, 8000) || ""}
-              placeholder={
-                ar
-                  ? "ما الذي تريد بناءه؟ لمن؟ وما التفاصيل المهمة؟"
-                  : "What are you building? Who is it for? What matters most?"
-              }
-            />
+            <BriefInput ar={ar} />
           </label>
           {q.error && (
             <p role="alert" className="form-error">

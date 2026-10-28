@@ -12,9 +12,17 @@ The foundation is implemented: Better Auth signup/login/logout, owner-scoped SQL
 
 Baseline verification: TypeScript, production build, 3 unit tests and 2 browser workflows passed in the previous implementation session. Browser workflows exercise signup, persisted briefs and notes, cross-user access rejection, signout/login, RTL, mobile overflow, and language persistence.
 
+## Latest completed milestone — dark workspace
+
+Implemented the reference-inspired dark/cyan shell, responsive icon rail, CSS iridescent orb, central composer, working prompt suggestions, and consistent dashboard/studio/login palette. Arabic RTL mirrors the desktop rail; mobile uses compact top navigation.
+
+Private briefs now persist in tab-scoped session storage through sign-in, instead of query strings. Successful creation clears the matching draft. Repeated `next` query parameters no longer crash login.
+
+Validation: type check, 3 unit tests, production build, and all 3 browser workflows passed. The browser suite now runs against its own port 3100 server and fresh SQLite database. It additionally checks mobile studio/dashboard layouts, delete cancel/confirm, and repeated redirect parameters. Screenshots are in `docs/screenshots/`. GitHub Actions is configured; remote CI execution has not yet been observed.
+
 ## Current task
 
-Apply the user's dark visual reference, validate it, then push a separate checkpoint. Update this document with completed work and exact validation results before pushing.
+Next: implement and test owner-scoped immutable source versions and structured file changes before adding AI orchestration. This milestone has no generated code execution, active provider integration, credits, or publication yet. Continue with source-version storage, path validation, optimistic concurrency, and meaningful authorization tests.
 
 ## Start here
 

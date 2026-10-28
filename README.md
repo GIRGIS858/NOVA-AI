@@ -4,7 +4,7 @@ A new Arabic/English platform for building websites through conversation. This r
 
 ## Available now
 
-- Responsive marketing website with three original, illustrative design directions.
+- Dark, reference-inspired workspace with a cyan glow, iridescent orb, icon rail, and working project suggestions.
 - Persistent Arabic/English preference and RTL layouts; bundled local fonts.
 - Email/password accounts and sessions using Better Auth, with database-backed rate limits.
 - Owner-scoped project creation, listing, notes, and deletion with confirmation.
@@ -65,13 +65,17 @@ SQLite is appropriate for this single-instance foundation. Multi-instance hostin
 npm run typecheck
 npm test
 npm run build
-# Start the server on port 3000 in another terminal first:
+# Build first; Playwright starts its own test server on port 3100:
 npm run test:e2e
 ```
 
-Browser tests use `/usr/bin/chromium` in this cloud environment. Set `CHROMIUM_PATH` to a compatible Chromium executable elsewhere. E2E tests create test accounts and projects in the configured database; use a dedicated local test database when running them against your own data. Never target a production database.
+Browser tests start a separate production-mode server on port 3100 with a random session secret and a unique database under ignored `data/e2e/`. They never reuse your running development server or account database. Build first. Set `NOVA_E2E_PORT` to another available local port when needed.
 
-The E2E suite checks signup, login, project persistence, notes after reload, cross-user rejection, signout, locale persistence, and mobile horizontal overflow. Screenshots are written to `/tmp/nova-*.png` in the cloud environment.
+Playwright uses `/usr/bin/chromium` when available in this local cloud image, otherwise its bundled browser. Run `npx playwright install chromium` on other machines, or set `CHROMIUM_PATH` to an explicit compatible executable. CI installs Chromium and system dependencies automatically.
+
+The E2E suite checks signup, login, project persistence, notes after reload, cross-user rejection, signout, confirmed deletion and cancellation, locale persistence, and mobile horizontal overflow on the home, dashboard, and studio screens. Screenshots and failure traces are written under ignored `test-results/`, with an HTML report under `playwright-report/`. Test databases remain under `data/e2e/` for local debugging and may be removed after the test server stops.
+
+GitHub Actions runs type checks, unit tests, a production build, and browser workflows for pushes to `main` and pull requests. It generates ephemeral credentials during execution; no account secrets are stored in the workflow.
 
 ## Security and deployment boundaries
 
@@ -84,3 +88,7 @@ The E2E suite checks signup, login, project persistence, notes after reload, cro
 - No billing or AI cost is incurred by project or note actions.
 
 See [the development plan](docs/PLAN.md) and [architecture decisions](docs/ARCHITECTURE.md).
+
+## Design checkpoint
+
+[Desktop screenshot](docs/screenshots/home-desktop.png) · [Mobile screenshot](docs/screenshots/home-mobile.png). Read [the continuation handoff](docs/HANDOFF.md) before starting another Codex session.

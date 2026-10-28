@@ -24,7 +24,7 @@ export async function createProject(form: FormData) {
   });
   if (!input.success) redirect("/app?error=validation");
   const id = projects.create(user.id, input.data);
-  redirect(`/app/projects/${id}`);
+  redirect(`/app/projects/${id}?created=1`);
 }
 export async function saveMessage(id: string, form: FormData) {
   const user = await requireUser();
