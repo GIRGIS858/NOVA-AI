@@ -56,6 +56,25 @@ describe("generation lifecycle with fixture provider", () => {
     await runGeneration(request, { projects, generations, provider });
     expect(provider).toHaveBeenCalledTimes(1);
   });
+  it("keeps the newest note when context exceeds the provider prompt budget", async () => {
+    projects.addMessage("alice", projectId, "A".repeat(8000));
+    projects.addMessage("alice", projectId, "B".repeat(8000));
+    projects.addMessage(
+      "alice",
+      projectId,
+      "Newest requirement: use an Arabic navigation menu.",
+    );
+    const provider = vi
+      .fn<typeof generateStaticSite>()
+      .mockResolvedValue(files);
+    await runGeneration(input(), { projects, generations, provider });
+    const prompt = provider.mock.calls[0][0].prompt;
+    expect(prompt.length).toBeLessThanOrEqual(16000);
+    expect(prompt).toContain(
+      "Newest requirement: use an Arabic navigation menu.",
+    );
+    expect(prompt).toContain("older content may be omitted");
+  });
   it("does not contact the provider for an unauthorized project", async () => {
     const provider = vi.fn<typeof generateStaticSite>();
     await expect(

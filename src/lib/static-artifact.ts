@@ -183,6 +183,26 @@ export function buildPreview(input: SourceFile[]): string {
     },
     enforceHtmlBoundary: false,
   });
+  // Check the sanitized document, not raw source: removed script/template text
+  // and stripped remote image URLs must not turn an empty result into a version.
+  // This is a structural content check, not a claim about arbitrary CSS visibility.
+  let hasContent = false;
+  sanitizeHtml(body, {
+    allowedTags: ["img"],
+    allowedAttributes: { img: ["src"] },
+    allowedSchemesByTag: { img: ["data"] },
+    textFilter: (text) => {
+      if (text.replace(/[\s\p{Cf}\p{Cc}]/gu, "")) hasContent = true;
+      return text;
+    },
+    exclusiveFilter: (frame) => {
+      if (frame.tag === "img" && rasterData.test(frame.attribs.src || "")) {
+        hasContent = true;
+      }
+      return false;
+    },
+  });
+  if (!hasContent) throw new ArtifactValidationError();
   // CSS is untrusted too: a literal closing style tag must never become HTML.
   // Network loads (including @import and url()) are denied by the document CSP.
   const css = files[1].content.replaceAll("<", "\\3c ");

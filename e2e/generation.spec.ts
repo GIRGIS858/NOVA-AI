@@ -1,9 +1,23 @@
-import { test, expect } from "@playwright/test";
+import { test, expect, type APIResponse } from "@playwright/test";
 import Database from "better-sqlite3";
 import { randomUUID } from "node:crypto";
 import { readFile } from "node:fs/promises";
 import { projectStore } from "../src/lib/projects";
 import { generationStore } from "../src/lib/generation-store";
+
+// Other workflows share localhost's IP. Respect Better Auth's real signup limit
+// during fixture setup instead of disabling it or spoofing client addresses.
+async function signupFixture(create: () => Promise<APIResponse>) {
+  let response = await create();
+  if (response.status() === 429) {
+    const seconds = Number(response.headers()["x-retry-after"]);
+    expect(seconds).toBeGreaterThan(0);
+    expect(seconds).toBeLessThanOrEqual(10);
+    await new Promise((resolve) => setTimeout(resolve, seconds * 1000 + 100));
+    response = await create();
+  }
+  return response;
+}
 
 // Fixtures are persisted test artifacts, not provider output. No runtime mock mode exists.
 test("static versions, ownership, missing-provider gate, and cancellation", async ({
@@ -17,14 +31,16 @@ test("static versions, ownership, missing-provider gate, and cancellation", asyn
     );
   }
   const origin = new URL(baseURL).origin;
-  const signup = await page.request.post("/api/auth/sign-up/email", {
-    headers: { Origin: origin },
-    data: {
-      email: `generation-${randomUUID()}@example.com`,
-      password: "Generation-test-password-2026!",
-      name: "Generation reviewer",
-    },
-  });
+  const signup = await signupFixture(() =>
+    page.request.post("/api/auth/sign-up/email", {
+      headers: { Origin: origin },
+      data: {
+        email: `generation-${randomUUID()}@example.com`,
+        password: "Generation-test-password-2026!",
+        name: "Generation reviewer",
+      },
+    }),
+  );
   expect(signup.ok()).toBe(true);
   const { user } = await signup.json();
   expect(typeof user.id).toBe("string");
@@ -54,16 +70,15 @@ test("static versions, ownership, missing-provider gate, and cancellation", asyn
   const other = await browser.newContext();
   const anonymous = await browser.newContext();
   try {
-    const otherSignup = await other.request.post(
-      `${baseURL}/api/auth/sign-up/email`,
-      {
+    const otherSignup = await signupFixture(() =>
+      other.request.post(`${baseURL}/api/auth/sign-up/email`, {
         headers: { Origin: origin },
         data: {
           email: `generation-other-${randomUUID()}@example.com`,
           password: "Other-generation-password-2026!",
           name: "Other generation reviewer",
         },
-      },
+      }),
     );
     expect(otherSignup.ok()).toBe(true);
     expect(
@@ -153,6 +168,12 @@ test("static versions, ownership, missing-provider gate, and cancellation", asyn
         () => document.documentElement.scrollWidth <= window.innerWidth,
       ),
     ).toBe(true);
+    await expect(
+      page
+        .frameLocator("iframe.generation-preview")
+        .getByRole("heading", { name: "Saved fixture version" }),
+    ).toBeVisible();
+    await page.evaluate(() => window.scrollTo(0, 0));
     await page.screenshot({
       path: "/tmp/nova-generation-mobile-ar.png",
       fullPage: true,
@@ -167,6 +188,12 @@ test("static versions, ownership, missing-provider gate, and cancellation", asyn
         () => document.documentElement.scrollWidth <= window.innerWidth,
       ),
     ).toBe(true);
+    await expect(
+      page
+        .frameLocator("iframe.generation-preview")
+        .getByRole("heading", { name: "Saved fixture version" }),
+    ).toBeVisible();
+    await page.evaluate(() => window.scrollTo(0, 0));
     await page.screenshot({
       path: "/tmp/nova-generation-mobile-en.png",
       fullPage: true,

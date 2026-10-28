@@ -65,6 +65,30 @@ describe("static source artifact boundary", () => {
 });
 
 describe("static preview document", () => {
+  it("rejects artifacts that sanitize to no useful text or allowed image", () => {
+    for (const html of [
+      "<script>alert('not visible')</script>",
+      "<head><title>Only a title</title></head>",
+      "<template><h1>Removed text</h1></template>",
+      "<svg><text>Removed text</text></svg>",
+      '<main><section class="css-shape"></section><br><hr></main>',
+      '<img src="https://outside.test/image.png" alt="Removed image">',
+      '<img src="data:image/svg+xml;base64,PHN2Zz4=">',
+      "<p> &#32; &nbsp; &#x200b; &ZeroWidthSpace; </p>",
+      "<!-- Only a comment -->",
+    ]) {
+      expect(() => buildPreview(files(html))).toThrow(ArtifactValidationError);
+    }
+    expect(buildPreview(files("<p>&amp;</p>"))).toContain("<p>&amp;</p>");
+    expect(buildPreview(files("Plain text without markup"))).toContain(
+      "Plain text without markup",
+    );
+    expect(
+      buildPreview(
+        files('<img src="data:image/png;base64,aGVsbG8=" alt="Only image">'),
+      ),
+    ).toContain('src="data:image/png;base64,aGVsbG8="');
+  });
   it("retains semantic content and valid language direction, replacing the supplied head", () => {
     const preview = buildPreview(
       files(

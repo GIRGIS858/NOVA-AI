@@ -56,7 +56,7 @@ Work proceeds in explicit sessions. Record completed work, evidence, and next st
 - [x] Bounded OpenAI adapter, proxy/TLS support and an explicit live smoke command.
 - [x] Sanitized static HTML/CSS preview with empty iframe sandbox, CSP and adversarial browser validation.
 - [x] Source/version UI, JSON download, owner-scoped endpoints and Arabic/English mobile tests.
-- [x] 70 unit tests, 6 browser workflows, production build, type check and repeatable migrations.
+- [x] 72 unit tests, 6 browser workflows, production build, type check and repeatable migrations.
 - [ ] Supply a secure provider credential and complete real OpenAI validation before activation.
 - [ ] Isolated full-stack build worker, actual deployment and production readiness.
 
