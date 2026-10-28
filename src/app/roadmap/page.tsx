@@ -18,7 +18,7 @@ export default async function Roadmap() {
         [
           "02",
           "البناء الحقيقي",
-          "ربط مزوّد AI، توليد ملفات وتعديلات محددة، وتشغيل معاينة في بيئة معزولة.",
+          "محاولات توليد ونسخ HTML وCSS ومعاينة معزولة جاهزة للاختبار. التفعيل ينتظر التحقق من مزوّد AI.",
           false,
         ],
         [
@@ -50,7 +50,7 @@ export default async function Roadmap() {
         [
           "02",
           "Real building",
-          "Connect an AI provider, generate focused file changes, and run an isolated preview.",
+          "Generation runs, HTML/CSS snapshots and isolated static previews are implemented. Activation awaits a real provider check.",
           false,
         ],
         [
@@ -105,20 +105,24 @@ export default async function Roadmap() {
                     ? "متاح محليًا"
                     : "Available locally"
                   : ar
-                    ? "مخطط له"
-                    : "Planned"}
+                    ? n === "02"
+                      ? "قيد التحقق"
+                      : "مخطط له"
+                    : n === "02"
+                      ? "Under validation"
+                      : "Planned"}
               </span>
             </article>
           ))}
         </div>
-        <section className="status-notice">
+        <section className="status-notice" id="availability">
           <h2>
             {ar ? "قبل استخدام بيانات مهمة" : "Before using important data"}
           </h2>
           <p>
             {ar
-              ? "هذه نسخة تطويرية وليست خدمة إنتاج جاهزة. لا يتوفر استرجاع كلمة المرور أو تأكيد البريد بعد. قاعدة البيانات محلية؛ لا توجد فرق مشتركة أو مدفوعات أو توليد AI مفعّل. لا تدخل أسرارًا في وصف المشروع."
-              : "This is a development release, not a production-ready service. Password recovery and email verification are not available yet. Storage is local. Shared teams, payments, and AI generation are not enabled. Do not put secrets in project briefs."}
+              ? "هذه نسخة تطويرية وليست خدمة إنتاج جاهزة. لا يتوفر استرجاع كلمة المرور أو تأكيد البريد بعد. قاعدة البيانات محلية؛ لا توجد فرق مشتركة أو مدفوعات. التوليد معطّل افتراضيًا ويحتاج إعداد المزوّد والتحقق منه. لا تدخل أسرارًا في وصف المشروع."
+              : "This is a development release, not a production-ready service. Password recovery and email verification are not available yet. Storage is local. Shared teams and payments are unavailable. AI generation is disabled by default pending provider configuration and validation. Do not put secrets in project briefs."}
           </p>
         </section>
         <Link className="button dark" href="/app">

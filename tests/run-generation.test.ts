@@ -2,6 +2,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import Database from "better-sqlite3";
 import { randomUUID } from "node:crypto";
 import { projectStore } from "../src/lib/projects";
+import { migrateSourceVersions } from "../src/lib/versions";
+import { migrateGeneration } from "../src/lib/generation-store";
 import { generationStore } from "../src/lib/generation-store";
 import { runGeneration } from "../src/lib/run-generation";
 import { ProviderError, type generateStaticSite } from "../src/lib/ai-provider";
@@ -18,6 +20,8 @@ describe("generation lifecycle with fixture provider", () => {
     db = new Database(":memory:");
     db.pragma("foreign_keys = ON");
     projects = projectStore(db);
+    migrateSourceVersions(db);
+    migrateGeneration(db);
     generations = generationStore(db);
     projectId = projects.create("alice", {
       name: "Portfolio",

@@ -79,6 +79,18 @@ function errorText(code: string, ar: boolean) {
       return ar
         ? "لم يجتز الناتج فحص الملفات. لم تُحفظ نسخة جديدة."
         : "The output did not pass file validation. No new version was saved.";
+    case "source_limit":
+      return ar
+        ? "وصل هذا المشروع إلى حد النسخ المحفوظة. لا يمكن حفظ نسخة إضافية الآن."
+        : "This project has reached its saved-version limit. Another version cannot be saved right now.";
+    case "unsupported_source":
+      return ar
+        ? "هذا الإصدار يحتوي على ملفات غير مدعومة في المعاينة الثابتة. تدعم المعاينة HTML وCSS فقط."
+        : "This version contains files that the static preview does not support. Preview supports HTML and CSS only.";
+    case "conflict":
+      return ar
+        ? "تغيّر إصدار المشروع أثناء التوليد. حدّث السجل قبل بدء محاولة جديدة."
+        : "The project version changed during generation. Refresh the history before starting another attempt.";
     case "request_conflict":
     case "invalid_request":
       return ar

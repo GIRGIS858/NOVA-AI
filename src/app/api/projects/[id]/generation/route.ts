@@ -1,3 +1,4 @@
+import { generationConfigured } from "@/lib/generation-config";
 import { generations } from "@/lib/db";
 import { authorizeProject, json } from "@/lib/generation-http";
 export const runtime = "nodejs";
@@ -11,6 +12,6 @@ export async function GET(
   return json({
     runs: generations.runs(auth.owner!, id),
     versions: generations.versions(auth.owner!, id),
-    configured: Boolean(process.env.NOVA_AI_API_KEY),
+    configured: generationConfigured(),
   });
 }

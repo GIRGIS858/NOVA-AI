@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useFormStatus } from "react-dom";
 import {
   ArrowUp,
@@ -11,6 +11,7 @@ import {
   LoaderCircle,
 } from "lucide-react";
 import { createProject } from "@/app/actions";
+import { DRAFT_KEY } from "@/lib/draft";
 
 function SubmitProject({ ar }: { ar: boolean }) {
   const { pending } = useFormStatus();
@@ -49,6 +50,18 @@ export function ProjectComposer({
   const [brief, setBrief] = useState(initialIdea);
   const [notice, setNotice] = useState("");
   const briefRef = useRef<HTMLTextAreaElement>(null);
+  useEffect(() => {
+    try {
+      const draft = sessionStorage.getItem(DRAFT_KEY);
+      if (draft) setBrief(draft.slice(0, 8000));
+    } catch {}
+  }, []);
+  function updateBrief(value: string) {
+    setBrief(value);
+    try {
+      sessionStorage.setItem(DRAFT_KEY, value);
+    } catch {}
+  }
   const suggestions = [
     {
       icon: LayoutTemplate,
@@ -98,7 +111,7 @@ export function ProjectComposer({
       return;
     }
     if (!name.trim()) setName(suggestion.name);
-    setBrief(nextBrief);
+    updateBrief(nextBrief);
     setNotice(
       ar
         ? "تمت إضافة الاقتراح. عدّله بما يناسب فكرتك."
@@ -139,7 +152,7 @@ export function ProjectComposer({
             minLength={10}
             maxLength={8000}
             value={brief}
-            onChange={(event) => setBrief(event.target.value)}
+            onChange={(event) => updateBrief(event.target.value)}
             aria-describedby="composer-help"
             placeholder={
               ar
@@ -158,8 +171,8 @@ export function ProjectComposer({
         <div className="composer-footer">
           <span id="composer-help" className="composer-help">
             {ar
-              ? "نحفظ فكرتك الآن. التوليد بالذكاء الاصطناعي قريبًا."
-              : "Save your brief today. AI generation is coming later."}
+              ? "احفظ فكرتك، ثم تابع الملفات والمعاينة داخل المشروع."
+              : "Save your brief, then explore source and previews in your project."}
           </span>
           <SubmitProject ar={ar} />
         </div>

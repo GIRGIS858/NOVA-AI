@@ -1,3 +1,4 @@
+import { generationConfigured } from "@/lib/generation-config";
 import { z } from "zod";
 import { generations, projects } from "@/lib/db";
 import {
@@ -29,7 +30,8 @@ export async function POST(
     return json({ error: "invalid_request" }, 400);
   }
   const apiKey = process.env.NOVA_AI_API_KEY;
-  if (!apiKey) return json({ error: "not_configured" }, 503);
+  if (!apiKey || !generationConfigured())
+    return json({ error: "not_configured" }, 503);
   try {
     const result = await runGeneration(
       {

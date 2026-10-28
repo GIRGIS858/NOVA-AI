@@ -25,3 +25,13 @@ The studio stores notes, not AI results. Its generation, preview, credits, and d
 ## Next engineering boundary
 
 AI orchestration and untrusted project execution must be separate concerns. A future worker must execute generated code outside the main web process, with filesystem, resource, time, and network boundaries. Secrets must not enter generated project files or model contexts. Add a real preview provider only once it can be tested end to end.
+
+## Source snapshot service
+
+`src/lib/versions.ts` persists append-only JSON snapshots in SQLite, using an immediate transaction to check the expected base and commit changes atomically. Restore creates a new version. Authorization always scopes to the owning project. `SOURCE_LIMITS` bounds files, UTF-8 bytes, and history length. The schema is initialized by the explicit migration command. This is internal infrastructure for the generation loop; it does not execute or publish source. See `SOURCE-VERSIONS.md`.
+
+## Static generation integration
+
+Generation uses the canonical source-version store with captured bases and conflict rejection. Explicit migrations add a separate run state machine and a retained attempt ledger. Failed/cancelled/deleted attempts still count toward rolling quotas; cancellation reserves concurrency until acknowledgement or lease expiry.
+
+The first provider adapter emits only HTML/CSS. Static artifact building validates/sanitizes strings and never executes generated code. Browser previews have an opaque iframe origin, empty sandbox and restrictive CSP; generated source is never served as application-origin HTML. Full-stack execution still requires the isolated worker described above. Live generation is gated by both a server-side credential and explicit activation after the real provider smoke check. See docs/GENERATION.md.

@@ -17,7 +17,7 @@
 html[dir="rtl"] .nova-workspace {
   padding: 14px 90px 14px 14px;
 }
-.workspace-frame {
+.nova-workspace .workspace-frame {
   min-height: calc(100dvh - 28px);
   border: 1px solid #273438;
   border-radius: 24px;
@@ -26,7 +26,7 @@ html[dir="rtl"] .nova-workspace {
     var(--bg);
   overflow: clip;
 }
-.workspace-rail {
+.nova-workspace .workspace-rail {
   position: fixed;
   inset-inline-start: 0;
   inset-block: 0;
@@ -38,19 +38,19 @@ html[dir="rtl"] .nova-workspace {
   gap: 45px;
   z-index: 5;
 }
-.rail-brand {
+.nova-workspace .rail-brand {
   color: var(--accent);
   display: grid;
   place-items: center;
   width: 44px;
   height: 44px;
 }
-.workspace-rail nav {
+.nova-workspace .workspace-rail nav {
   display: flex;
   flex-direction: column;
   gap: 13px;
 }
-.rail-link {
+.nova-workspace .rail-link {
   width: 44px;
   height: 44px;
   display: grid;
@@ -59,16 +59,16 @@ html[dir="rtl"] .nova-workspace {
   color: #a0afb2;
   border: 1px solid transparent;
 }
-.rail-link:hover,
-.rail-link.active {
+.nova-workspace .rail-link:hover,
+.nova-workspace .rail-link.active {
   background: #1c2c2e;
   color: #a5f4e6;
   border-color: #335052;
 }
-.rail-bottom {
+.nova-workspace .rail-bottom {
   margin-top: auto;
 }
-.workspace-header {
+.nova-workspace .workspace-header {
   min-height: 85px;
   padding: 20px 30px;
   display: flex;
@@ -76,20 +76,20 @@ html[dir="rtl"] .nova-workspace {
   justify-content: space-between;
   gap: 16px;
 }
-.workspace-wordmark {
+.nova-workspace .workspace-wordmark {
   display: flex;
   align-items: center;
   gap: 22px;
 }
-.workspace-wordmark > span:first-child {
+.nova-workspace .workspace-wordmark > span:first-child {
   font-size: 29px;
   font-weight: 700;
   letter-spacing: -1.6px;
 }
-.workspace-wordmark > span:first-child > span {
+.nova-workspace .workspace-wordmark > span:first-child > span {
   color: var(--accent);
 }
-.workspace-header-label {
+.nova-workspace .workspace-header-label {
   border-inline-start: 1px solid var(--line);
   padding-inline-start: 22px;
   font-size: 12px;
@@ -102,7 +102,7 @@ html[dir="rtl"] .nova-workspace {
   background: #213135;
   color: white;
 }
-.workspace-skip {
+.nova-workspace .workspace-skip {
   position: fixed;
   inset-inline-start: 100px;
   top: 16px;
@@ -114,7 +114,7 @@ html[dir="rtl"] .nova-workspace {
   padding: 10px 18px;
   border-radius: 8px;
 }
-.workspace-skip:focus {
+.nova-workspace .workspace-skip:focus {
   clip-path: none;
   pointer-events: auto;
 }
@@ -159,34 +159,34 @@ html[dir="rtl"] .nova-workspace {
   background: #243336;
   color: #c0d8d7;
 }
-.nova-dashboard {
+.nova-workspace .nova-dashboard {
   max-width: 1120px;
   padding: 8px 48px 50px;
   margin: auto;
 }
-.workspace-welcome {
+.nova-workspace .workspace-welcome {
   text-align: center;
   max-width: 760px;
   margin: 0 auto 28px;
 }
-.workspace-welcome .overline {
+.nova-workspace .workspace-welcome .overline {
   color: #a9c5c6;
   font-size: 11px;
   margin: 10px 0;
 }
-.workspace-welcome h1 {
+.nova-workspace .workspace-welcome h1 {
   font-size: clamp(30px, 3.4vw, 46px);
   font-weight: 500;
   letter-spacing: -1.3px;
   line-height: 1.4;
   overflow-wrap: anywhere;
 }
-.workspace-welcome p {
+.nova-workspace .workspace-welcome p {
   color: #a8bcbe;
   font-size: 14px;
   margin-top: 10px;
 }
-.nova-orb {
+.nova-workspace .nova-orb {
   width: 106px;
   height: 106px;
   margin: 16px auto 24px;
@@ -209,7 +209,7 @@ html[dir="rtl"] .nova-workspace {
     inset 3px 3px 16px #e0ffec70,
     0 0 75px #58d2c425;
 }
-.nova-orb::after {
+.nova-workspace .nova-orb::after {
   content: "";
   position: absolute;
   inset: 9%;
@@ -218,12 +218,12 @@ html[dir="rtl"] .nova-workspace {
   transform: rotate(-35deg) scaleX(0.58);
   box-shadow: 12px 0 16px #c8b0fa55;
 }
-.composer-section {
+.nova-workspace .composer-section {
   max-width: 760px;
   margin: auto;
   scroll-margin-top: 30px;
 }
-.project-composer {
+.nova-workspace .project-composer {
   background: linear-gradient(140deg, #1c2c30, #141d21);
   border: 1px solid #3c555a;
   border-radius: 20px;
@@ -232,15 +232,15 @@ html[dir="rtl"] .nova-workspace {
   display: grid;
   gap: 18px;
 }
-.project-composer label {
+.nova-workspace .project-composer label {
   color: #c6d5d6;
   font-size: 12px;
   text-align: start;
 }
-.project-composer input {
+.nova-workspace .project-composer input {
   background: #0c141740;
 }
-.project-composer textarea {
+.nova-workspace .project-composer textarea {
   background: transparent;
   border: 0;
   padding: 10px 0;
@@ -248,11 +248,11 @@ html[dir="rtl"] .nova-workspace {
   font-size: 16px;
   box-shadow: none;
 }
-.project-composer textarea:focus-visible {
+.nova-workspace .project-composer textarea:focus-visible {
   outline-offset: 5px;
   border-radius: 2px;
 }
-.composer-footer {
+.nova-workspace .composer-footer {
   border-top: 1px solid #304247;
   padding-top: 15px;
   display: flex;
@@ -260,19 +260,19 @@ html[dir="rtl"] .nova-workspace {
   align-items: center;
   gap: 16px;
 }
-.composer-footer p,
-.composer-footer > span {
+.nova-workspace .composer-footer p,
+.nova-workspace .composer-footer > span {
   font-size: 11px;
   color: #a7bfc2;
   max-width: 330px;
 }
-.suggestion-grid {
+.nova-workspace .suggestion-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 12px;
   margin: 18px auto 0;
 }
-.suggestion-card {
+.nova-workspace .suggestion-card {
   background: #141e21;
   color: #cbd9da;
   border: 1px solid #2e3f43;
@@ -288,30 +288,30 @@ html[dir="rtl"] .nova-workspace {
     border-color 0.2s;
   min-width: 0;
 }
-.suggestion-card:hover {
+.nova-workspace .suggestion-card:hover {
   background: #1c2c30;
   border-color: #62867e;
 }
-.suggestion-card svg {
+.nova-workspace .suggestion-card svg {
   color: #99dccc;
 }
-.suggestion-card strong {
+.nova-workspace .suggestion-card strong {
   font-size: 13px;
   font-weight: 500;
 }
-.suggestion-card span,
-.suggestion-card p {
+.nova-workspace .suggestion-card span,
+.nova-workspace .suggestion-card p {
   font-size: 11px;
   color: #a4b7bb;
 }
-.nova-dashboard .project-section {
+.nova-workspace .nova-dashboard .project-section {
   margin-top: 50px;
   scroll-margin-top: 24px;
 }
-.nova-dashboard .section-heading {
+.nova-workspace .nova-dashboard .section-heading {
   margin-bottom: 20px;
 }
-.nova-dashboard .project-section h2 {
+.nova-workspace .nova-dashboard .project-section h2 {
   font-size: 20px;
 }
 .nova-workspace .project-card {
@@ -400,7 +400,7 @@ html[dir="rtl"] .nova-workspace {
   background-size: 200% 100%;
 }
 @media (max-width: 1050px) {
-  .nova-dashboard {
+  .nova-workspace .nova-dashboard {
     padding-inline: 28px;
   }
   .nova-workspace .studio-grid {
@@ -412,7 +412,7 @@ html[dir="rtl"] .nova-workspace {
   html[dir="rtl"] .nova-workspace {
     padding: 64px 8px 8px;
   }
-  .workspace-rail {
+  .nova-workspace .workspace-rail {
     inset-block: 0 auto;
     width: 100%;
     height: 64px;
@@ -422,91 +422,91 @@ html[dir="rtl"] .nova-workspace {
     background: #080c0ef5;
     border-bottom: 1px solid #28383c;
   }
-  .workspace-rail nav {
+  .nova-workspace .workspace-rail nav {
     flex-direction: row;
     gap: 6px;
   }
-  .rail-bottom {
+  .nova-workspace .rail-bottom {
     margin-top: 0;
     margin-inline-start: auto;
   }
-  .rail-link,
-  .rail-brand {
+  .nova-workspace .rail-link,
+  .nova-workspace .rail-brand {
     width: 40px;
     height: 40px;
   }
-  .workspace-frame {
+  .nova-workspace .workspace-frame {
     border-radius: 18px;
     min-height: calc(100dvh - 72px);
   }
-  .workspace-header {
+  .nova-workspace .workspace-header {
     padding: 17px;
     min-height: 70px;
     gap: 8px;
   }
-  .workspace-wordmark > span:first-child {
+  .nova-workspace .workspace-wordmark > span:first-child {
     font-size: 27px;
   }
-  .workspace-header-label {
+  .nova-workspace .workspace-header-label {
     display: none;
   }
-  .workspace-header .button {
+  .nova-workspace .workspace-header .button {
     font-size: 11px;
     padding: 7px;
   }
-  .workspace-header .header-actions {
+  .nova-workspace .workspace-header .header-actions {
     gap: 3px;
   }
-  .nova-dashboard {
+  .nova-workspace .nova-dashboard {
     padding: 5px 16px 32px;
   }
-  .workspace-welcome {
+  .nova-workspace .workspace-welcome {
     margin-bottom: 24px;
   }
-  .workspace-welcome h1 {
+  .nova-workspace .workspace-welcome h1 {
     font-size: 30px;
     letter-spacing: -0.7px;
   }
-  .workspace-welcome p {
+  .nova-workspace .workspace-welcome p {
     font-size: 12px;
   }
-  .nova-orb {
+  .nova-workspace .nova-orb {
     width: 82px;
     height: 82px;
     margin-top: 12px;
     margin-bottom: 20px;
   }
-  .project-composer {
+  .nova-workspace .project-composer {
     padding: 17px;
     border-radius: 16px;
   }
-  .project-composer textarea {
+  .nova-workspace .project-composer textarea {
     font-size: 14px;
   }
-  .composer-footer {
+  .nova-workspace .composer-footer {
     align-items: start;
     flex-direction: column;
     gap: 12px;
   }
-  .composer-footer .button {
+  .nova-workspace .composer-footer .button {
     align-self: end;
   }
-  .suggestion-grid {
+  .nova-workspace .suggestion-grid {
     grid-template-columns: 1fr;
     gap: 8px;
   }
-  .suggestion-card {
+  .nova-workspace .suggestion-card {
     padding: 13px 15px;
     gap: 5px;
   }
-  .nova-dashboard .project-section {
+  .nova-workspace .nova-dashboard .project-section {
     margin-top: 32px;
   }
-  .nova-dashboard .section-heading {
+  .nova-workspace .nova-dashboard .section-heading {
     flex-wrap: wrap;
     gap: 8px;
   }
-  .workspace-skip {
+  .nova-workspace .workspace-skip {
     inset-inline-start: 16px;
   }
   .nova-workspace .studio-toolbar h1 {
@@ -514,24 +514,24 @@ html[dir="rtl"] .nova-workspace {
   }
 }
 
-.suggestion-heading {
+.nova-workspace .suggestion-heading {
   color: #a4b7bb;
   font-size: 11px;
   margin-top: 22px;
 }
-.suggestion-copy {
+.nova-workspace .suggestion-copy {
   display: flex;
   flex-direction: column;
   gap: 5px;
 }
-.suggestion-copy strong {
+.nova-workspace .suggestion-copy strong {
   color: #d8e7e7;
 }
-.suggestion-arrow {
+.nova-workspace .suggestion-arrow {
   align-self: end;
   margin-top: auto;
 }
-.suggestion-notice {
+.nova-workspace .suggestion-notice {
   color: #b6e6d9;
   font-size: 12px;
   min-height: 24px;

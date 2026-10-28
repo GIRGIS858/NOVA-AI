@@ -1,4 +1,4 @@
-import { type generationStore } from "./generation-store";
+import { GenerationStoreError, type generationStore } from "./generation-store";
 import { type projectStore } from "./projects";
 import {
   type generateStaticSite,
@@ -50,11 +50,9 @@ export async function runGeneration(
       .recentMessages(input.owner, input.projectId)
       .map((note) => note.content)
       .join("\n\n");
+    const prefix = `Project: ${project.name}\nBrief:\n${project.brief}\n\nLatest saved notes (older content may be omitted):\n`;
     const prompt =
-      `Project: ${project.name}\nBrief:\n${project.brief}\n\nLatest saved notes:\n${notes}`.slice(
-        0,
-        MAX_PROMPT_CHARS,
-      );
+      prefix + notes.slice(-Math.max(1, MAX_PROMPT_CHARS - prefix.length));
     const files = await provider({ prompt, apiKey: input.apiKey, signal });
     if (signal.aborted)
       throw new ProviderError(
@@ -78,7 +76,7 @@ export async function runGeneration(
       ? signal.reason?.name === "TimeoutError"
         ? "timeout"
         : "cancelled"
-      : error instanceof ProviderError
+      : error instanceof ProviderError || error instanceof GenerationStoreError
         ? error.code
         : "invalid_output";
     if (code === "cancelled")

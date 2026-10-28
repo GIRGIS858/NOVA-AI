@@ -9,6 +9,7 @@ import "@fontsource/ibm-plex-sans-arabic/600.css";
 import "@fontsource/ibm-plex-sans-arabic/700.css";
 import { getLocale } from "@/lib/locale";
 import "./globals.css";
+import "./dark.css";
 export const metadata: Metadata = {
   title: { default: "Nova — Build your next idea", template: "%s · Nova" },
   description:

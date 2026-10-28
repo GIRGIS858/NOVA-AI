@@ -9,13 +9,16 @@ import { generationStore } from "../src/lib/generation-store";
 test("static versions, ownership, missing-provider gate, and cancellation", async ({
   page,
   browser,
+  baseURL,
 }) => {
-  test.skip(
-    !process.env.NOVA_E2E_DATABASE_PATH,
-    "Requires an explicitly selected dedicated E2E database matching the server.",
-  );
+  if (!baseURL || !process.env.NOVA_E2E_DATABASE_PATH) {
+    throw new Error(
+      "Generation E2E requires the isolated suite configuration.",
+    );
+  }
+  const origin = new URL(baseURL).origin;
   const signup = await page.request.post("/api/auth/sign-up/email", {
-    headers: { Origin: "http://localhost:3000" },
+    headers: { Origin: origin },
     data: {
       email: `generation-${randomUUID()}@example.com`,
       password: "Generation-test-password-2026!",
@@ -52,9 +55,9 @@ test("static versions, ownership, missing-provider gate, and cancellation", asyn
   const anonymous = await browser.newContext();
   try {
     const otherSignup = await other.request.post(
-      "http://localhost:3000/api/auth/sign-up/email",
+      `${baseURL}/api/auth/sign-up/email`,
       {
-        headers: { Origin: "http://localhost:3000" },
+        headers: { Origin: origin },
         data: {
           email: `generation-other-${randomUUID()}@example.com`,
           password: "Other-generation-password-2026!",
@@ -65,29 +68,23 @@ test("static versions, ownership, missing-provider gate, and cancellation", asyn
     expect(otherSignup.ok()).toBe(true);
     expect(
       (
-        await anonymous.request.get(
-          `http://localhost:3000${base}/versions/${version.id}`,
-        )
+        await anonymous.request.get(`${baseURL}${base}/versions/${version.id}`)
       ).status(),
     ).toBe(401);
     expect(
       (
-        await other.request.get(
-          `http://localhost:3000${base}/versions/${version.id}`,
-        )
+        await other.request.get(`${baseURL}${base}/versions/${version.id}`)
       ).status(),
     ).toBe(404);
     expect(
-      (
-        await other.request.get(`http://localhost:3000${base}/generation`)
-      ).status(),
+      (await other.request.get(`${baseURL}${base}/generation`)).status(),
     ).toBe(404);
     expect(
       (
         await other.request.post(
-          `http://localhost:3000${base}/generation/${active.run.id}/cancel`,
+          `${baseURL}${base}/generation/${active.run.id}/cancel`,
           {
-            headers: { Origin: "http://localhost:3000" },
+            headers: { Origin: origin },
           },
         )
       ).status(),
@@ -104,7 +101,7 @@ test("static versions, ownership, missing-provider gate, and cancellation", asyn
     });
     expect(noOrigin.status()).toBe(403);
     const unavailable = await page.request.post(`${base}/generate`, {
-      headers: { Origin: "http://localhost:3000" },
+      headers: { Origin: origin },
       data: { requestId: randomUUID() },
     });
     expect(unavailable.status()).toBe(503);

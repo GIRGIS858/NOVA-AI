@@ -9,18 +9,19 @@ export const metadata = { title: "Welcome" };
 export default async function Login({
   searchParams,
 }: {
-  searchParams: Promise<{ next?: string }>;
+  searchParams: Promise<{ next?: string | string[] }>;
 }) {
   const locale = await getLocale();
   const ar = locale === "ar";
   const q = await searchParams;
+  const requestedNext = typeof q.next === "string" ? q.next : undefined;
   const next =
-    q.next &&
-    (q.next === "/app" ||
-      q.next.startsWith("/app?") ||
-      q.next.startsWith("/app/")) &&
-    !q.next.includes("\\")
-      ? q.next
+    requestedNext &&
+    (requestedNext === "/app" ||
+      requestedNext.startsWith("/app?") ||
+      requestedNext.startsWith("/app/")) &&
+    !requestedNext.includes("\\")
+      ? requestedNext
       : "/app";
   if (await session()) redirect(next);
   return (

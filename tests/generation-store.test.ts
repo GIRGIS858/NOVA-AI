@@ -2,8 +2,10 @@ import { randomUUID } from "node:crypto";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import Database from "better-sqlite3";
 import { projectStore } from "../src/lib/projects";
+import { migrateSourceVersions, sourceVersionStore } from "../src/lib/versions";
 import {
   generationStore,
+  migrateGeneration,
   GENERATION_LIMITS,
   GenerationStoreError,
 } from "../src/lib/generation-store";
@@ -28,6 +30,8 @@ describe("generation reservation and version ownership", () => {
     db = new Database(":memory:");
     db.pragma("foreign_keys = ON");
     projects = projectStore(db);
+    migrateSourceVersions(db);
+    migrateGeneration(db);
     store = generationStore(db);
   });
   afterEach(() => db.close());
@@ -35,6 +39,8 @@ describe("generation reservation and version ownership", () => {
   it("migrates once and preserves data on repeated initialization", () => {
     const id = project();
     const run = reserve("alice", id);
+    migrateSourceVersions(db);
+    migrateGeneration(db);
     generationStore(db);
     expect(store.getRun("alice", run.id, now)?.status).toBe("running");
     expect(
@@ -231,6 +237,115 @@ describe("generation reservation and version ownership", () => {
     ).toThrow("invalid_request");
     expect(store.versions("alice", id)).toEqual([]);
     expect(store.getRun("alice", run.id, now)?.status).toBe("running");
+  });
+  it("commits through canonical source history and captures its exact base", () => {
+    const id = project();
+    const sources = sourceVersionStore(db);
+    const base = sources.commit("alice", id, {
+      baseVersionId: null,
+      summary: "Initial static source",
+      changes: files.map((file) => ({ type: "write", ...file })),
+    });
+    expect(store.versions("alice", id)).toEqual([]);
+    expect(store.version("alice", id, base.id)).toBeUndefined();
+    const run = reserve("alice", id);
+    expect(run.base_version_id).toBe(base.id);
+    const result = store.complete("alice", run.id, files, now)!;
+    expect(sources.latest("alice", id)).toMatchObject({
+      id: result.id,
+      baseVersionId: base.id,
+      number: 2,
+      files,
+    });
+    expect(sources.get("alice", id, base.id).files).toEqual(files);
+    expect(store.getRun("alice", run.id, now)?.generated_version_id).toBe(
+      result.id,
+    );
+  });
+  it("refuses unsupported source snapshots before reserving or spending", () => {
+    const id = project();
+    const sources = sourceVersionStore(db);
+    const existing = sources.commit("alice", id, {
+      baseVersionId: null,
+      summary: "Existing application",
+      changes: [
+        {
+          type: "write",
+          path: "src/app.tsx",
+          content: "export default function App() { return <h1>Existing</h1> }",
+        },
+      ],
+    });
+    expect(() => reserve("alice", id)).toThrow("unsupported_source");
+    expect(sources.latest("alice", id)?.id).toBe(existing.id);
+    expect(
+      db.prepare("SELECT COUNT(*) AS count FROM generation_attempts").get(),
+    ).toEqual({ count: 0 });
+  });
+  it("rejects generated output when another source edit landed during the run", () => {
+    const id = project();
+    const sources = sourceVersionStore(db);
+    const base = sources.commit("alice", id, {
+      baseVersionId: null,
+      summary: "Initial source",
+      changes: files.map((file) => ({ type: "write", ...file })),
+    });
+    const run = reserve("alice", id);
+    const concurrent = sources.commit("alice", id, {
+      baseVersionId: base.id,
+      summary: "User edit while provider runs",
+      changes: [
+        {
+          type: "write",
+          path: "index.html",
+          content: "<h1>Keep the user's latest edit</h1>",
+        },
+      ],
+    });
+    expect(() => store.complete("alice", run.id, files, now)).toThrow(
+      "conflict",
+    );
+    store.fail("alice", run.id, "conflict", now);
+    expect(store.getRun("alice", run.id, now)?.error_code).toBe("conflict");
+    expect(sources.latest("alice", id)).toEqual(concurrent);
+    expect(store.versions("alice", id)).toEqual([]);
+  });
+  it("maps canonical history caps to a safe source_limit failure", () => {
+    const id = project();
+    const sources = sourceVersionStore(db);
+    let baseVersionId: string | null = null;
+    for (let i = 0; i < 128; i++) {
+      const saved = sources.commit("alice", id, {
+        baseVersionId,
+        summary: `Revision ${i + 1}`,
+        changes: files.map((file) => ({ type: "write", ...file })),
+      });
+      baseVersionId = saved.id;
+    }
+    expect(() => reserve("alice", id)).toThrow("source_limit");
+    expect(
+      db.prepare("SELECT COUNT(*) AS count FROM generation_attempts").get(),
+    ).toEqual({ count: 0 });
+    expect(sources.list("alice", id)).toHaveLength(128);
+  });
+  it("refuses legacy conflicting source schemas without deleting their data", () => {
+    const legacy = new Database(":memory:");
+    try {
+      legacy.exec(
+        "CREATE TABLE source_versions (id TEXT PRIMARY KEY, run_id TEXT, files_json TEXT)",
+      );
+      legacy
+        .prepare("INSERT INTO source_versions VALUES (?, ?, ?)")
+        .run("old-id", "old-run", "[]");
+      expect(() => migrateGeneration(legacy)).toThrow(
+        "Canonical source_versions schema required",
+      );
+      expect(legacy.prepare("SELECT id FROM source_versions").get()).toEqual({
+        id: "old-id",
+      });
+    } finally {
+      legacy.close();
+    }
   });
   it("never persists raw provider error text", () => {
     const run = reserve("alice", project());

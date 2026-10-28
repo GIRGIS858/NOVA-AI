@@ -9,16 +9,13 @@ export const metadata = { title: "Workspace" };
 export default async function Dashboard({
   searchParams,
 }: {
-  searchParams: Promise<{ idea?: string; error?: string }>;
+  searchParams: Promise<{ error?: string | string[] }>;
 }) {
   const q = await searchParams;
   const locale = await getLocale();
   const ar = locale === "ar";
   const current = await session();
-  if (!current)
-    redirect(
-      `/login?next=${encodeURIComponent("/app" + (q.idea ? "?idea=" + encodeURIComponent(q.idea.slice(0, 8000)) : ""))}`,
-    );
+  if (!current) redirect("/login?next=%2Fapp");
   const items = projects.list(current.user.id);
   return (
     <main className="dashboard section-shell nova-dashboard">
@@ -40,12 +37,7 @@ export default async function Dashboard({
             : "A little space for a big idea. Start with what’s on your mind."}
         </p>
       </section>
-      <ProjectComposer
-        key={q.idea || ""}
-        ar={ar}
-        initialIdea={q.idea?.slice(0, 8000) || ""}
-        hasError={Boolean(q.error)}
-      />
+      <ProjectComposer ar={ar} initialIdea="" hasError={Boolean(q.error)} />
       <section
         className="project-section"
         id="projects"
