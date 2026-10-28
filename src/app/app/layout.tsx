@@ -1,34 +1,45 @@
-import { Brand } from "@/components/brand";
 import { LocaleButton } from "@/components/locale-button";
 import { SignOut } from "@/components/sign-out";
+import { WorkspaceNav } from "@/components/workspace-nav";
 import { getLocale } from "@/lib/locale";
 import Link from "next/link";
+import "./workspace.css";
+
 export default async function AppLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const locale = await getLocale();
-  const ar = locale === "ar";
+  const ar = (await getLocale()) === "ar";
   return (
-    <div className="app-shell">
-      <header className="site-header app-header">
-        <div className="header-actions">
-          <Brand />
-          <span className="header-divider" />
-          <Link href="/app" className="workspace-link">
-            {ar ? "مساحة العمل" : "Workspace"}
+    <div className="app-shell nova-workspace">
+      <a className="workspace-skip" href="#workspace-content">
+        {ar ? "انتقل للمحتوى" : "Skip to content"}
+      </a>
+      <WorkspaceNav ar={ar} />
+      <div className="workspace-frame">
+        <header className="workspace-header">
+          <Link
+            href="/app"
+            className="workspace-wordmark"
+            aria-label={ar ? "نوفا — مساحة العمل" : "Nova workspace"}
+          >
+            <span dir="ltr">
+              nova<span>.</span>
+            </span>
+            <span className="workspace-header-label">
+              {ar ? "مساحة العمل" : "Workspace"}
+            </span>
           </Link>
+          <div className="header-actions">
+            <LocaleButton locale={ar ? "ar" : "en"} />
+            <SignOut ar={ar} />
+          </div>
+        </header>
+        <div id="workspace-content" tabIndex={-1}>
+          {children}
         </div>
-        <div className="header-actions">
-          <Link className="roadmap-link" href="/roadmap">
-            {ar ? "حالة المنتج" : "Product status"}
-          </Link>
-          <LocaleButton locale={locale} />
-          <SignOut ar={ar} />
-        </div>
-      </header>
-      {children}
+      </div>
     </div>
   );
 }

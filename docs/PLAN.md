@@ -13,6 +13,16 @@
 
 Verified in this environment: TypeScript check, production build, 3 ownership/validation unit tests, and 2 end-to-end browser workflows. The browser checks exercise real signup/login, persisted projects and notes, cross-user rejection, signout, mobile layout, and persistent language switching. Local schema setup was run twice successfully. Desktop, mobile, and studio screenshots were visually inspected.
 
+## 01b — Dark workspace checkpoint (complete)
+
+- [x] Scoped dark workspace and studio with cyan ambient light and an iridescent orb.
+- [x] Compact navigation, accessible names, skip link, and mirrored mobile/RTL layouts.
+- [x] Central project composer with three functional bilingual suggestions that preserve existing content.
+- [x] Pending state, 8,000-character guard, keyboard feedback, and automatic input direction.
+- [x] Build, type check, 3 unit tests, 3 browser workflows, and desktop/mobile visual review.
+
+AI generation and previews remain unavailable. Browser tests additionally exercise suggestion input preservation, literal HTML-looking notes, and confirmed deletion. Production dependency audit found no known advisories at this checkpoint.
+
 ## 02 — A real building loop
 
 Next vertical slice: one user prompt → an authorized run → structured file operations → a stored source version → isolated build → verified preview.
