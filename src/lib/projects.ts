@@ -60,6 +60,16 @@ export function projectStore(db: Database.Database) {
         )
         .all(id) as Message[];
     },
+    recentMessages(owner: string, id: string) {
+      if (!get(owner, id)) return [];
+      return (
+        db
+          .prepare(
+            "SELECT id, content, created_at FROM messages WHERE project_id = ? ORDER BY created_at DESC, rowid DESC LIMIT 8",
+          )
+          .all(id) as Message[]
+      ).reverse();
+    },
     addMessage(owner: string, id: string, content: unknown) {
       const value = messageInput.parse(content);
       return db.transaction(() => {

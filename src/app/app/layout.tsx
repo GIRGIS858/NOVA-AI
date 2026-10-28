@@ -4,6 +4,7 @@ import { WorkspaceNav } from "@/components/workspace-nav";
 import { getLocale } from "@/lib/locale";
 import Link from "next/link";
 import "./workspace.css";
+import "./generation.css";
 
 export default async function AppLayout({
   children,

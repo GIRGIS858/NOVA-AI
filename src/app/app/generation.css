@@ -1,0 +1,229 @@
+.generation-panel {
+  min-width: 0;
+  padding: 24px;
+  border: 1px solid #345052;
+  border-radius: 16px;
+  background: linear-gradient(145deg, #17292c, #101a1d);
+}
+.generation-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+}
+.generation-heading > svg {
+  color: #98e4d2;
+}
+.generation-heading .overline {
+  color: #9dbab9;
+  font-size: 9px;
+  margin-bottom: 9px;
+}
+.generation-heading h3 {
+  color: #e6f1ee;
+  font-size: 19px;
+}
+.generation-description {
+  margin-top: 17px;
+  color: #bfcecf;
+  font-size: 12px;
+  line-height: 1.9;
+}
+.generation-limits {
+  color: #a2b7bb;
+  font-size: 11px;
+  margin-top: 9px;
+}
+.generation-unavailable {
+  background: #263236;
+  border: 1px solid #43555b;
+  border-radius: 9px;
+  color: #d0dce0;
+  padding: 13px;
+  font-size: 12px;
+  margin-top: 17px;
+}
+.generation-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 20px 0 10px;
+}
+.generation-panel .button:disabled {
+  cursor: not-allowed;
+}
+.generation-refresh {
+  margin-inline-start: auto;
+}
+.generation-live {
+  min-height: 22px;
+  color: #b4dacc;
+  font-size: 11px;
+}
+.generation-version {
+  border-top: 1px solid #34494c;
+  margin-top: 18px;
+  padding-top: 20px;
+  min-width: 0;
+}
+.generation-version label {
+  color: #b9ced0;
+  font-size: 12px;
+}
+.generation-version select {
+  max-width: 100%;
+  width: 100%;
+  border: 1px solid #3a5155;
+  border-radius: 9px;
+  background: #102025;
+  color: #e0efee;
+  padding: 10px;
+  font: inherit;
+}
+.generation-view-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-wrap: wrap;
+  margin: 12px 0;
+}
+.generation-view-actions button[aria-pressed="true"] {
+  background: #28433f;
+  color: #c2f3e3;
+}
+.generation-preview-note {
+  color: #a8c2c4;
+  font-size: 10px;
+  margin-bottom: 12px;
+}
+.generation-preview {
+  width: 100%;
+  min-height: 480px;
+  border: 1px solid #496064;
+  border-radius: 9px;
+  background: white;
+  display: block;
+}
+.generation-source {
+  border: 1px solid #34494c;
+  border-radius: 9px;
+  overflow: hidden;
+  min-width: 0;
+}
+.generation-file-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px;
+  background: #15272b;
+  padding: 5px;
+  direction: ltr;
+}
+.generation-file-tabs button {
+  border: 1px solid transparent;
+  background: transparent;
+  color: #b5c6c9;
+  border-radius: 5px;
+  padding: 8px 10px;
+  font-size: 11px;
+}
+.generation-file-tabs button[aria-pressed="true"] {
+  border-color: #477368;
+  background: #253f39;
+  color: #d0f3e8;
+}
+.generation-source pre {
+  background: #0a1417;
+  color: #cfe7df;
+  margin: 0;
+  padding: 18px;
+  max-height: 480px;
+  max-width: 100%;
+  overflow: auto;
+  font-size: 12px;
+  line-height: 1.7;
+  tab-size: 2;
+  text-align: left;
+}
+.generation-empty {
+  border: 1px dashed #365055;
+  background: #101d20;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 23px 16px;
+  color: #aac1c3;
+  font-size: 12px;
+  margin-top: 14px;
+}
+.generation-history {
+  border-top: 1px solid #34494c;
+  margin-top: 22px;
+  padding-top: 16px;
+}
+.generation-history summary {
+  cursor: pointer;
+  font-size: 12px;
+  color: #c4d7d7;
+}
+.generation-history summary span {
+  color: #96aeaf;
+}
+.generation-history ol {
+  list-style: none;
+  padding: 0;
+  margin: 12px 0 0;
+}
+.generation-history li {
+  padding: 12px 0;
+  border-top: 1px solid #293c40;
+}
+.generation-history li > div {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.generation-run-status {
+  color: #cedcde;
+  font-size: 12px;
+}
+.generation-run-status.run-succeeded {
+  color: #a4e0bf;
+}
+.generation-run-status.run-failed {
+  color: #efb9ac;
+}
+.generation-history time {
+  color: #9bb4b7;
+  font-size: 10px;
+}
+.generation-history li p {
+  color: #b6c8ca;
+  font-size: 11px;
+  margin-top: 7px;
+}
+@media (max-width: 760px) {
+  .generation-panel {
+    padding: 17px;
+  }
+  .generation-heading h3 {
+    font-size: 17px;
+  }
+  .generation-refresh {
+    margin-inline-start: 0;
+  }
+  .generation-preview {
+    min-height: 430px;
+  }
+  .generation-panel .button.small {
+    font-size: 10px;
+    padding: 8px 10px;
+  }
+  .generation-empty {
+    align-items: start;
+    padding: 17px 13px;
+  }
+}

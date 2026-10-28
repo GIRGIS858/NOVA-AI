@@ -4,15 +4,14 @@ import {
   ArrowRight,
   MessageSquare,
   FileText,
-  PanelsTopLeft,
   LockKeyhole,
   Check,
   Send,
   CircleDashed,
-  ChevronLeft,
 } from "lucide-react";
 import { requireUser } from "@/lib/auth";
-import { projects } from "@/lib/db";
+import { projects, generations } from "@/lib/db";
+import { GenerationPanel } from "@/components/generation-panel";
 import { getLocale } from "@/lib/locale";
 import { saveMessage } from "@/app/actions";
 import { DeleteProject } from "@/components/delete-project";
@@ -67,8 +66,8 @@ export default async function Studio({
               <CircleDashed size={17} />
               <p>
                 {ar
-                  ? "احفظ متطلباتك وملاحظاتك هنا. توليد الشيفرة غير مفعّل في هذه المرحلة؛ لن تُرسل الملاحظات إلى مزوّد AI ولن يُخصم أي رصيد."
-                  : "Capture your requirements and notes here. Code generation is not enabled in this release. Notes are not sent to an AI provider and no credits are charged."}
+                  ? "احفظ متطلباتك وملاحظاتك هنا. الحفظ لا يستدعي الذكاء الاصطناعي؛ تُرسل التفاصيل للمزوّد فقط عند اختيار توليد نسخة جديدة."
+                  : "Capture your requirements and notes here. Saving a note does not call AI. Details are sent to the provider only when you choose to generate a new version."}
               </p>
             </div>
             {messages.map((m) => (
@@ -141,25 +140,14 @@ export default async function Studio({
               <h3>{ar ? "الوصف الأساسي" : "The brief"}</h3>
               <p>{project.brief}</p>
             </section>
-            <div className="preview-placeholder">
-              <PanelsTopLeft size={34} strokeWidth={1} />
-              <div>
-                <h3>
-                  {ar
-                    ? "المعاينة تأتي في المرحلة التالية"
-                    : "Preview is the next milestone"}
-                </h3>
-                <p>
-                  {ar
-                    ? "تحتاج توليد ملفات ومشغّلًا معزولًا. لا توجد معاينة أو عملية نشر نشطة لهذا المشروع."
-                    : "It requires generated files and an isolated runner. This project has no active preview or deployment."}
-                </p>
-              </div>
-              <Link className="text-link" href="/roadmap">
-                {ar ? "ما القادم؟" : "What’s next?"}
-                <ChevronLeft size={16} />
-              </Link>
-            </div>
+            <GenerationPanel
+              key={id}
+              projectId={id}
+              ar={ar}
+              configured={Boolean(process.env.NOVA_AI_API_KEY)}
+              initialRuns={generations.runs(user.id, id)}
+              initialVersions={generations.versions(user.id, id)}
+            />
             <div className="project-details">
               <span>{ar ? "آخر تحديث" : "Last updated"}</span>
               <time dateTime={project.updated_at}>
