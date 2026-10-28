@@ -20,6 +20,10 @@ Private briefs now persist in tab-scoped session storage through sign-in, instea
 
 Validation: type check, 3 unit tests, production build, and all 3 browser workflows passed. The browser suite now runs against its own port 3100 server and fresh SQLite database. It additionally checks mobile studio/dashboard layouts, delete cancel/confirm, and repeated redirect parameters. Screenshots are in `docs/screenshots/`. GitHub Actions is configured; remote CI execution has not yet been observed.
 
+## Concurrent session integration
+
+Merged the separate session's `595d088` workspace redesign into this branch. Its accessible, append-only suggestion composer, pending save state, scoped workspace theme, navigation, and keyboard/mobile/XSS checks are preserved. The public dark home, session draft privacy fixes, dedicated browser runner, and CI configuration are also retained. Styles are scoped to prevent cross-route leaks. The combined tree passed TypeScript, all 3 unit tests, the production build, and all 4 browser workflows. Always fetch before pushing: more than one session may be active.
+
 ## Current task
 
 Next: implement and test owner-scoped immutable source versions and structured file changes before adding AI orchestration. This milestone has no generated code execution, active provider integration, credits, or publication yet. Continue with source-version storage, path validation, optimistic concurrency, and meaningful authorization tests.

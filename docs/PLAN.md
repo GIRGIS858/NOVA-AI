@@ -20,7 +20,7 @@ Verified in this environment: TypeScript check, production build, 3 ownership/va
 - [x] Brief persistence through sign-in without private text in URLs.
 - [x] Repeated redirect query validation.
 - [x] Isolated portable browser runner and GitHub Actions workflow.
-- [x] Three complete browser workflows passed after the redesign.
+- [x] Four complete browser workflows passed after merging the concurrent workspace redesign.
 - [x] Screenshot evidence and continuation instructions.
 
 ## 02 — A real building loop

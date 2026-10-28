@@ -11,7 +11,7 @@ import {
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import type { Locale } from "@/lib/locale";
-export const DRAFT_KEY = "nova.project-draft.v1";
+import { DRAFT_KEY } from "@/lib/draft";
 export function IdeaComposer({ locale }: { locale: Locale }) {
   const ar = locale === "ar";
   const router = useRouter();

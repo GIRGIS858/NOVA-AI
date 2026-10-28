@@ -1,0 +1,539 @@
+/* Workspace theme is scoped so public and authentication pages keep their own palette. */
+.nova-workspace {
+  --bg: #0b1012;
+  --surface: #141b1e;
+  --ink: #f0f5f4;
+  --muted: #a0afb2;
+  --line: #2a363a;
+  --accent: #87e9d5;
+  --accent-soft: #1b3635;
+  --green: #8be4b7;
+  color-scheme: dark;
+  color: var(--ink);
+  background: #080c0e;
+  min-height: 100dvh;
+  padding: 14px 14px 14px 90px;
+}
+html[dir="rtl"] .nova-workspace {
+  padding: 14px 90px 14px 14px;
+}
+.nova-workspace .workspace-frame {
+  min-height: calc(100dvh - 28px);
+  border: 1px solid #273438;
+  border-radius: 24px;
+  background:
+    radial-gradient(ellipse 65% 430px at 50% 0, #133b3e85, transparent),
+    var(--bg);
+  overflow: clip;
+}
+.nova-workspace .workspace-rail {
+  position: fixed;
+  inset-inline-start: 0;
+  inset-block: 0;
+  width: 90px;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  padding: 30px 0 26px;
+  gap: 45px;
+  z-index: 5;
+}
+.nova-workspace .rail-brand {
+  color: var(--accent);
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+}
+.nova-workspace .workspace-rail nav {
+  display: flex;
+  flex-direction: column;
+  gap: 13px;
+}
+.nova-workspace .rail-link {
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  border-radius: 13px;
+  color: #a0afb2;
+  border: 1px solid transparent;
+}
+.nova-workspace .rail-link:hover,
+.nova-workspace .rail-link.active {
+  background: #1c2c2e;
+  color: #a5f4e6;
+  border-color: #335052;
+}
+.nova-workspace .rail-bottom {
+  margin-top: auto;
+}
+.nova-workspace .workspace-header {
+  min-height: 85px;
+  padding: 20px 30px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+.nova-workspace .workspace-wordmark {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+}
+.nova-workspace .workspace-wordmark > span:first-child {
+  font-size: 29px;
+  font-weight: 700;
+  letter-spacing: -1.6px;
+}
+.nova-workspace .workspace-wordmark > span:first-child > span {
+  color: var(--accent);
+}
+.nova-workspace .workspace-header-label {
+  border-inline-start: 1px solid var(--line);
+  padding-inline-start: 22px;
+  font-size: 12px;
+  color: var(--muted);
+}
+.nova-workspace .button.ghost {
+  color: #b6c4c6;
+}
+.nova-workspace .button.ghost:hover {
+  background: #213135;
+  color: white;
+}
+.nova-workspace .workspace-skip {
+  position: fixed;
+  inset-inline-start: 100px;
+  top: 16px;
+  clip-path: inset(50%);
+  pointer-events: none;
+  z-index: 10;
+  background: var(--accent);
+  color: #0a2925;
+  padding: 10px 18px;
+  border-radius: 8px;
+}
+.nova-workspace .workspace-skip:focus {
+  clip-path: none;
+  pointer-events: auto;
+}
+.nova-workspace :focus-visible {
+  outline-color: #92ecda;
+}
+.nova-workspace input,
+.nova-workspace textarea {
+  background: #111a1d;
+  color: var(--ink);
+  border-color: var(--line);
+}
+.nova-workspace input::placeholder,
+.nova-workspace textarea::placeholder {
+  color: #91a2a6;
+}
+.nova-workspace .button.primary,
+.nova-workspace .button.dark {
+  background: #9aefdb;
+  color: #102c28;
+  box-shadow: none;
+}
+.nova-workspace .button.primary:hover,
+.nova-workspace .button.dark:hover {
+  background: #bbfbe9;
+}
+.nova-workspace .pill {
+  background: #203235;
+  color: #bbd5d6;
+  border-color: #365054;
+}
+.nova-workspace .icon-tile {
+  background: #203638;
+  color: #94ddce;
+}
+.nova-workspace .form-error {
+  background: #392321;
+  border-color: #6b3d36;
+  color: #ffc0ae;
+}
+.nova-workspace .count {
+  background: #243336;
+  color: #c0d8d7;
+}
+.nova-workspace .nova-dashboard {
+  max-width: 1120px;
+  padding: 8px 48px 50px;
+  margin: auto;
+}
+.nova-workspace .workspace-welcome {
+  text-align: center;
+  max-width: 760px;
+  margin: 0 auto 28px;
+}
+.nova-workspace .workspace-welcome .overline {
+  color: #a9c5c6;
+  font-size: 11px;
+  margin: 10px 0;
+}
+.nova-workspace .workspace-welcome h1 {
+  font-size: clamp(30px, 3.4vw, 46px);
+  font-weight: 500;
+  letter-spacing: -1.3px;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+.nova-workspace .workspace-welcome p {
+  color: #a8bcbe;
+  font-size: 14px;
+  margin-top: 10px;
+}
+.nova-workspace .nova-orb {
+  width: 106px;
+  height: 106px;
+  margin: 16px auto 24px;
+  position: relative;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 28% 22%, #e5fff6 0, #82e9d3 14%, transparent 43%),
+    radial-gradient(circle at 78% 68%, #ca98e5, transparent 57%),
+    conic-gradient(
+      from 20deg,
+      #2e727d,
+      #81c6e2,
+      #a4f0db,
+      #1e626d,
+      #bfe8f0,
+      #2e727d
+    );
+  box-shadow:
+    inset -12px -12px 24px #07262e90,
+    inset 3px 3px 16px #e0ffec70,
+    0 0 75px #58d2c425;
+}
+.nova-workspace .nova-orb::after {
+  content: "";
+  position: absolute;
+  inset: 9%;
+  border: 1px solid #d9ffff70;
+  border-radius: 50%;
+  transform: rotate(-35deg) scaleX(0.58);
+  box-shadow: 12px 0 16px #c8b0fa55;
+}
+.nova-workspace .composer-section {
+  max-width: 760px;
+  margin: auto;
+  scroll-margin-top: 30px;
+}
+.nova-workspace .project-composer {
+  background: linear-gradient(140deg, #1c2c30, #141d21);
+  border: 1px solid #3c555a;
+  border-radius: 20px;
+  padding: 22px;
+  box-shadow: 0 10px 40px #00000030;
+  display: grid;
+  gap: 18px;
+}
+.nova-workspace .project-composer label {
+  color: #c6d5d6;
+  font-size: 12px;
+  text-align: start;
+}
+.nova-workspace .project-composer input {
+  background: #0c141740;
+}
+.nova-workspace .project-composer textarea {
+  background: transparent;
+  border: 0;
+  padding: 10px 0;
+  min-height: 100px;
+  font-size: 16px;
+  box-shadow: none;
+}
+.nova-workspace .project-composer textarea:focus-visible {
+  outline-offset: 5px;
+  border-radius: 2px;
+}
+.nova-workspace .composer-footer {
+  border-top: 1px solid #304247;
+  padding-top: 15px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+}
+.nova-workspace .composer-footer p,
+.nova-workspace .composer-footer > span {
+  font-size: 11px;
+  color: #a7bfc2;
+  max-width: 330px;
+}
+.nova-workspace .suggestion-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin: 18px auto 0;
+}
+.nova-workspace .suggestion-card {
+  background: #141e21;
+  color: #cbd9da;
+  border: 1px solid #2e3f43;
+  border-radius: 13px;
+  padding: 17px;
+  text-align: start;
+  display: flex;
+  flex-direction: column;
+  align-items: start;
+  gap: 9px;
+  transition:
+    background 0.2s,
+    border-color 0.2s;
+  min-width: 0;
+}
+.nova-workspace .suggestion-card:hover {
+  background: #1c2c30;
+  border-color: #62867e;
+}
+.nova-workspace .suggestion-card svg {
+  color: #99dccc;
+}
+.nova-workspace .suggestion-card strong {
+  font-size: 13px;
+  font-weight: 500;
+}
+.nova-workspace .suggestion-card span,
+.nova-workspace .suggestion-card p {
+  font-size: 11px;
+  color: #a4b7bb;
+}
+.nova-workspace .nova-dashboard .project-section {
+  margin-top: 50px;
+  scroll-margin-top: 24px;
+}
+.nova-workspace .nova-dashboard .section-heading {
+  margin-bottom: 20px;
+}
+.nova-workspace .nova-dashboard .project-section h2 {
+  font-size: 20px;
+}
+.nova-workspace .project-card {
+  background: #131c1f;
+  border-color: #2a383c;
+}
+.nova-workspace .project-card:hover {
+  border-color: #658d83;
+  box-shadow: 0 10px 30px #0003;
+}
+.nova-workspace .project-cover {
+  background:
+    radial-gradient(ellipse at 50% 130%, #366c69, transparent 80%), #1b2d32;
+  height: 110px;
+}
+.nova-workspace .cover-1 {
+  background:
+    radial-gradient(ellipse at 50% 130%, #59507b, transparent 80%), #26283c;
+}
+.nova-workspace .cover-2 {
+  background:
+    radial-gradient(ellipse at 50% 130%, #76613f, transparent 80%), #302c24;
+}
+.nova-workspace .project-monogram {
+  color: #d7eee6;
+}
+.nova-workspace .empty-projects {
+  border-color: #34464b;
+  background: #131c1f80;
+  color: #a5b9be;
+  padding: 30px;
+}
+.nova-workspace .empty-projects h3 {
+  color: #d3e1e2;
+}
+.nova-workspace .studio-toolbar,
+.nova-workspace .conversation-panel,
+.nova-workspace .workspace-panel .panel-heading {
+  background: #111b1e;
+}
+.nova-workspace .studio-toolbar .header-actions {
+  min-width: 0;
+  flex-wrap: wrap;
+}
+.nova-workspace .studio-grid {
+  min-height: calc(100dvh - 190px);
+}
+.nova-workspace .workspace-panel {
+  background: #0e1619;
+}
+.nova-workspace .brief-message {
+  background: #1b3032;
+  border-color: #354e50;
+}
+.nova-workspace .brief-message .overline,
+.nova-workspace .system-note {
+  color: #a9c6c5;
+}
+.nova-workspace .studio-composer textarea {
+  background: #0d171a;
+}
+.nova-workspace .outline-brief p {
+  color: #b8cbcd;
+}
+.nova-workspace .preview-placeholder {
+  background: #172629;
+  border-color: #435d60;
+  color: #9ec9c6;
+}
+.nova-workspace .preview-placeholder h3 {
+  color: #d0e3e2;
+}
+.nova-workspace .preview-placeholder p {
+  color: #adc3c5;
+}
+.nova-workspace .delete-control span {
+  color: #f1aba1;
+}
+.nova-workspace .button.danger {
+  background: #3b2426;
+  border-color: #694044;
+  color: #ffb9ae;
+}
+.nova-workspace .skeleton {
+  background: linear-gradient(90deg, #1d3034, #304449, #1d3034);
+  background-size: 200% 100%;
+}
+@media (max-width: 1050px) {
+  .nova-workspace .nova-dashboard {
+    padding-inline: 28px;
+  }
+  .nova-workspace .studio-grid {
+    grid-template-columns: minmax(280px, 330px) minmax(0, 1fr);
+  }
+}
+@media (max-width: 760px) {
+  .nova-workspace,
+  html[dir="rtl"] .nova-workspace {
+    padding: 64px 8px 8px;
+  }
+  .nova-workspace .workspace-rail {
+    inset-block: 0 auto;
+    width: 100%;
+    height: 64px;
+    flex-direction: row;
+    padding: 8px 18px;
+    gap: 20px;
+    background: #080c0ef5;
+    border-bottom: 1px solid #28383c;
+  }
+  .nova-workspace .workspace-rail nav {
+    flex-direction: row;
+    gap: 6px;
+  }
+  .nova-workspace .rail-bottom {
+    margin-top: 0;
+    margin-inline-start: auto;
+  }
+  .nova-workspace .rail-link,
+  .nova-workspace .rail-brand {
+    width: 40px;
+    height: 40px;
+  }
+  .nova-workspace .workspace-frame {
+    border-radius: 18px;
+    min-height: calc(100dvh - 72px);
+  }
+  .nova-workspace .workspace-header {
+    padding: 17px;
+    min-height: 70px;
+    gap: 8px;
+  }
+  .nova-workspace .workspace-wordmark > span:first-child {
+    font-size: 27px;
+  }
+  .nova-workspace .workspace-header-label {
+    display: none;
+  }
+  .nova-workspace .workspace-header .button {
+    font-size: 11px;
+    padding: 7px;
+  }
+  .nova-workspace .workspace-header .header-actions {
+    gap: 3px;
+  }
+  .nova-workspace .nova-dashboard {
+    padding: 5px 16px 32px;
+  }
+  .nova-workspace .workspace-welcome {
+    margin-bottom: 24px;
+  }
+  .nova-workspace .workspace-welcome h1 {
+    font-size: 30px;
+    letter-spacing: -0.7px;
+  }
+  .nova-workspace .workspace-welcome p {
+    font-size: 12px;
+  }
+  .nova-workspace .nova-orb {
+    width: 82px;
+    height: 82px;
+    margin-top: 12px;
+    margin-bottom: 20px;
+  }
+  .nova-workspace .project-composer {
+    padding: 17px;
+    border-radius: 16px;
+  }
+  .nova-workspace .project-composer textarea {
+    font-size: 14px;
+  }
+  .nova-workspace .composer-footer {
+    align-items: start;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .nova-workspace .composer-footer .button {
+    align-self: end;
+  }
+  .nova-workspace .suggestion-grid {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+  .nova-workspace .suggestion-card {
+    padding: 13px 15px;
+    gap: 5px;
+  }
+  .nova-workspace .nova-dashboard .project-section {
+    margin-top: 32px;
+  }
+  .nova-workspace .nova-dashboard .section-heading {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .nova-workspace .workspace-skip {
+    inset-inline-start: 16px;
+  }
+  .nova-workspace .studio-toolbar h1 {
+    max-width: 170px;
+  }
+}
+
+.nova-workspace .suggestion-heading {
+  color: #a4b7bb;
+  font-size: 11px;
+  margin-top: 22px;
+}
+.nova-workspace .suggestion-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.nova-workspace .suggestion-copy strong {
+  color: #d8e7e7;
+}
+.nova-workspace .suggestion-arrow {
+  align-self: end;
+  margin-top: auto;
+}
+.nova-workspace .suggestion-notice {
+  color: #b6e6d9;
+  font-size: 12px;
+  min-height: 24px;
+  margin-top: 10px;
+}

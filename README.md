@@ -8,6 +8,7 @@ A new Arabic/English platform for building websites through conversation. This r
 - Persistent Arabic/English preference and RTL layouts; bundled local fonts.
 - Email/password accounts and sessions using Better Auth, with database-backed rate limits.
 - Owner-scoped project creation, listing, notes, and deletion with confirmation.
+- A dark workspace with compact navigation, an iridescent orb, and three bilingual suggestions that preserve your draft.
 - A studio that persists the brief and notes, accurately labeling generation and previews as unavailable.
 - Product status and milestone documentation.
 

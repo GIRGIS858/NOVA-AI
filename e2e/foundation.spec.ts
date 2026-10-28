@@ -156,3 +156,103 @@ test("responsive landing and language switching", async ({
   await expect(page.locator("html")).toHaveAttribute("lang", "en");
   await expectNoHorizontalOverflow(page);
 });
+
+test("workspace suggestions, mobile locales, and confirmed project deletion", async ({
+  page,
+  baseURL,
+}, testInfo) => {
+  const signup = await page.request.post("/api/auth/sign-up/email", {
+    headers: { Origin: baseURL! },
+    data: {
+      email: `workspace-${randomUUID()}@example.com`,
+      password: "Workspace-test-password-2026!",
+      name: "Workspace reviewer",
+    },
+  });
+  expect(signup.ok()).toBe(true);
+  await page.goto("/app");
+  await page.waitForLoadState("networkidle");
+  await expect(page.locator("html")).toHaveAttribute("dir", "rtl");
+  const suggestions = page.locator(".suggestion-grid button");
+  await expect(suggestions).toHaveCount(3);
+  await suggestions.first().focus();
+  await page.keyboard.press("Enter");
+  await expect(page).toHaveURL(/\/app$/);
+  await expect(page.getByLabel("اسم المشروع")).not.toHaveValue("");
+  await expect(page.getByLabel("الفكرة والأهداف")).not.toHaveValue("");
+  await expect(page.getByLabel("الفكرة والأهداف")).toBeFocused();
+  await page.getByLabel("اسم المشروع").fill("My existing project");
+  const existingBrief = "Keep my original requirements.";
+  await page.getByLabel("الفكرة والأهداف").fill(existingBrief);
+  await suggestions.nth(1).click();
+  await expect(page.getByLabel("اسم المشروع")).toHaveValue(
+    "My existing project",
+  );
+  await expect(page.getByLabel("الفكرة والأهداف")).toHaveValue(
+    new RegExp(`^${existingBrief.replaceAll(".", "\\.")}\\n\\n.+`),
+  );
+  await page.evaluate(() => window.scrollTo(0, 0));
+  await page.screenshot({
+    path: testInfo.outputPath("workspace-desktop.png"),
+    fullPage: true,
+  });
+
+  await page.setViewportSize({ width: 375, height: 812 });
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= window.innerWidth,
+    ),
+  ).toBe(true);
+  await page.screenshot({
+    path: testInfo.outputPath("workspace-mobile-ar.png"),
+    fullPage: true,
+  });
+  await page.getByRole("button", { name: "English", exact: true }).click();
+  await expect(page.locator("html")).toHaveAttribute("dir", "ltr");
+  await page.reload();
+  await expect(page.locator("html")).toHaveAttribute("lang", "en");
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= window.innerWidth,
+    ),
+  ).toBe(true);
+  await page.screenshot({
+    path: testInfo.outputPath("workspace-mobile-en.png"),
+    fullPage: true,
+  });
+
+  const projectName = `Workspace check ${randomUUID().slice(0, 8)}`;
+  await page.getByLabel("Project name", { exact: true }).fill(projectName);
+  await page
+    .getByLabel("Your idea and goals")
+    .fill("A portfolio for an independent creative studio.");
+  await page
+    .getByRole("button", { name: "Create project", exact: true })
+    .click();
+  await expect(page).toHaveURL(/\/app\/projects\//);
+  const projectUrl = page.url();
+  const literalNote = '<img src=x onerror="alert(1)">';
+  await page.getByLabel("Add to your project brief").fill(literalNote);
+  await page.getByRole("button", { name: "Save note", exact: true }).click();
+  await expect(page.getByText(literalNote, { exact: true })).toBeVisible();
+  await expect(page.locator(".user-message img")).toHaveCount(0);
+  await page
+    .getByRole("button", { name: "Delete project", exact: true })
+    .click();
+  await page.getByRole("button", { name: "Cancel", exact: true }).click();
+  await page.reload();
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText(projectName);
+  await expect(page.getByText(literalNote, { exact: true })).toBeVisible();
+  await page
+    .getByRole("button", { name: "Delete project", exact: true })
+    .click();
+  await page
+    .getByRole("button", { name: "Delete permanently", exact: true })
+    .click();
+  await expect(page).toHaveURL(/\/app$/);
+  await expect(
+    page.getByRole("link", { name: new RegExp(projectName) }),
+  ).toHaveCount(0);
+  await page.goto(projectUrl);
+  await expect(page.getByText("This page isn’t available.")).toBeVisible();
+});

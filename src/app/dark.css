@@ -133,7 +133,7 @@ textarea::placeholder {
   flex-direction: column;
   z-index: 3;
 }
-.rail-logo {
+.nova-stage .rail-logo {
   direction: ltr;
   display: flex;
   align-items: center;
@@ -144,23 +144,23 @@ textarea::placeholder {
   color: #ecf1f5;
   margin-bottom: 32px;
 }
-.rail-logo > span {
+.nova-stage .rail-logo > span {
   font-size: 12px;
   color: #65d8ee;
   transform: translateY(-7px);
 }
-.rail-nav,
-.rail-bottom {
+.nova-stage .rail-nav,
+.nova-stage .rail-bottom {
   display: flex;
   align-items: center;
   flex-direction: column;
   gap: 14px;
 }
-.rail-bottom {
+.nova-stage .rail-bottom {
   margin-top: auto;
   padding-top: 50px;
 }
-.rail-link {
+.nova-stage .rail-link {
   position: relative;
   display: grid;
   place-items: center;
@@ -174,17 +174,17 @@ textarea::placeholder {
     background 0.2s,
     color 0.2s;
 }
-.rail-link:hover {
+.nova-stage .rail-link:hover {
   background: #ffffff0b;
   color: white;
 }
-.rail-link.is-active {
+.nova-stage .rail-link.is-active {
   background: #1197bd;
   border-color: #4dc9e659;
   color: #eaffff;
   box-shadow: 0 0 20px #10a8d025;
 }
-.rail-tooltip {
+.nova-stage .rail-tooltip {
   position: absolute;
   inset-inline-start: calc(100% + 10px);
   top: 7px;
@@ -199,11 +199,11 @@ textarea::placeholder {
   pointer-events: none;
   transition: opacity 0.15s;
 }
-.rail-link:hover .rail-tooltip,
-.rail-link:focus-visible .rail-tooltip {
+.nova-stage .rail-link:hover .rail-tooltip,
+.nova-stage .rail-link:focus-visible .rail-tooltip {
   opacity: 1;
 }
-.rail-profile {
+.nova-stage .rail-profile {
   display: grid;
   place-items: center;
   position: relative;
@@ -216,7 +216,7 @@ textarea::placeholder {
   font-weight: 600;
   color: #bdebf1;
 }
-.rail-profile > svg {
+.nova-stage .rail-profile > svg {
   position: absolute;
   bottom: -1px;
   inset-inline-end: -2px;
@@ -310,7 +310,7 @@ textarea::placeholder {
   opacity: 0.24;
   bottom: 5px;
 }
-.nova-orb {
+.orb-scene .nova-orb {
   position: relative;
   isolation: isolate;
   width: 148px;
@@ -820,7 +820,7 @@ body:has(.error-page) {
   .orb-scene {
     height: 190px;
   }
-  .nova-orb {
+  .orb-scene .nova-orb {
     width: 160px;
     height: 160px;
   }
@@ -903,36 +903,36 @@ body:has(.error-page) {
     gap: 18px;
     align-items: center;
   }
-  .rail-logo {
+  .nova-stage .rail-logo {
     margin: 0;
     font-size: 22px;
   }
-  .rail-nav {
+  .nova-stage .rail-nav {
     flex-direction: row;
     gap: 9px;
     margin-inline-start: auto;
   }
-  .rail-link {
+  .nova-stage .rail-link {
     width: 33px;
     height: 33px;
     border-radius: 10px;
   }
-  .rail-link > svg {
+  .nova-stage .rail-link > svg {
     width: 15px;
   }
-  .rail-tooltip {
+  .nova-stage .rail-tooltip {
     display: none;
   }
-  .rail-bottom {
+  .nova-stage .rail-bottom {
     flex-direction: row;
     margin: 0;
     padding: 0;
     gap: 0;
   }
-  .rail-bottom > .rail-link {
+  .nova-stage .rail-bottom > .rail-link {
     display: none;
   }
-  .rail-profile {
+  .nova-stage .rail-profile {
     width: 29px;
     height: 29px;
     font-size: 10px;
@@ -961,7 +961,7 @@ body:has(.error-page) {
     height: 135px;
     margin: 5px 0 12px;
   }
-  .nova-orb {
+  .orb-scene .nova-orb {
     width: 114px;
     height: 114px;
   }
@@ -1213,8 +1213,8 @@ body:has(.error-page) {
   }
 }
 @media (prefers-reduced-motion: reduce) {
-  .rail-link,
-  .rail-tooltip,
+  .nova-stage .rail-link,
+  .nova-stage .rail-tooltip,
   .suggestion-card,
   .send-orb {
     transition: none;
