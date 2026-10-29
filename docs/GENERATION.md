@@ -5,13 +5,15 @@ This milestone integrates authorized generation runs with the canonical source v
 ## State and persistence
 
 - POST `/api/projects/:id/generate` requires the authenticated owner, exact configured Origin, JSON `{requestId: UUID}`, configured server credential and explicit enable flag. It reserves once, invokes the provider and stores a source snapshot atomically on success.
-- GET `/api/projects/:id/generation` returns bounded run history and generation-produced version metadata.
+- GET `/api/projects/:id/generation` returns bounded run history and all canonical version metadata (generated, manually edited, restored).
 - GET `/api/projects/:id/versions/:versionId` returns authorized source JSON and a sanitized preview document. It does not serve executable HTML at the application's origin.
 - POST `/api/projects/:id/generation/:runId/cancel` requires ownership and exact Origin. It marks cancellation; the running request observes it and aborts. Cancellation may still consume the provider’s free quota.
 
 Statuses are `running`, `succeeded`, `failed`, and `cancelled`. There is no durable background queue yet: requests execute within the server request lifetime, with a 90-second timeout and a 120-second crash-recovery lease. Status reads reconcile stale leases. Nothing retries the provider automatically.
 
 Base versions are captured before the provider call. Completion uses `sourceVersionStore.commit`; source conflicts are surfaced instead of overwriting concurrent work. Unsupported existing application snapshots and exhausted source history are rejected before a provider request. A retained accounting ledger prevents project deletion from resetting limits. Cancellation holds concurrency until the worker acknowledges it. No prompts, source bodies or provider error details are stored in that ledger.
+
+Manual static saves and restores use separate owner/origin-checked endpoints and the same canonical store. They require no AI credential and consume no generation attempts. See `SOURCE-VERSIONS.md`.
 
 ## Preview boundary
 

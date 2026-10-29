@@ -1,6 +1,6 @@
 # Source version service
 
-This is an internal, tested prerequisite for AI generation. It does not call models, write files to the operating system, run generated code, serve previews, or deploy anything. Generation now commits through this service; owner-scoped read endpoints expose generation-produced versions. There are no general source editor mutation endpoints yet. See GENERATION.md.
+This is an internal, tested prerequisite for AI generation. It does not call models, write files to the operating system, run generated code, serve previews, or deploy anything. Generation and the manual static editor now commit through this service. Owner-scoped read endpoints expose generated, manually edited and restored versions. The public mutation boundary supports static HTML/CSS only. See GENERATION.md.
 
 ## API
 
@@ -63,6 +63,17 @@ Run `npm run db:migrate`; `migrateSourceVersions(db)` creates the initial schema
 
 Tests cover immutable edit/delete/restore history, project ownership, cross-project restore rejection, path constraints, rollback, byte/file/history limits, cascading project deletion, and stale edits across two independent SQLite connections.
 
+## Static editor HTTP integration
+
+- `POST /api/projects/:id/source`: JSON `{baseVersionId: UUID | null, files: [{path, content}, ...]}`; creates an immutable version after file and sanitized-preview validation. JSON is bounded to 768 KiB before parsing; decoded files remain limited to 100 KiB/file and 120 KiB total.
+- `POST /api/projects/:id/source/restore`: JSON `{baseVersionId: UUID | null, versionId: UUID}`; validates the target and appends a restored version. Previous versions remain intact.
+- Both writes require an authenticated project owner and exact configured Origin. They do not call an AI provider or consume generation attempts. Missing sessions return 401, other owners 404, invalid origin 403, stale base 409, malformed input 400, unsupported/invalid static output 422.
+- History reads include all canonical snapshots, with stable version numbers and restore provenance. Preview/source reads remain owner-scoped.
+
+The editor captures its base on opening and never silently rebases. A conflicting save preserves the on-page draft and offers JSON download; the user can reconcile with the latest source. The draft is not autosaved. Full reload/close warns when dirty, and explicit editor closure asks before discarding; ordinary application navigation can discard an unsaved in-memory draft. Save before navigating.
+
+Browser coverage exercises create → edit → restore, retained earlier content, a concurrent session save, draft preservation on conflict, invalid/oversized bodies, cross-origin and cross-account rejection, and mobile Arabic/English layouts. Fixtures contain manually supplied source and do not imply live AI validation.
+
 ## Next integration
 
-Add durable authorized generation runs and a provider adapter. Capture the base source version before requesting a change set; pass the result through this service. A provider response is untrusted input. Then build an isolated runner and verify its output before exposing a preview. Do not run application code inside Nova's web process.
+Include the captured source version in AI edit context with explicit limits. Build a separately isolated runner for JavaScript/full-stack execution and verify readiness before exposing it. Never run generated application code inside Nova's web process.

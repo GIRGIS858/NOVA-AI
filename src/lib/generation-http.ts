@@ -31,7 +31,10 @@ export function validOrigin(request: Request) {
     return false;
   }
 }
-export async function smallJson(request: Request): Promise<unknown> {
+export async function smallJson(
+  request: Request,
+  maxBytes = 1024,
+): Promise<unknown> {
   if (!request.headers.get("content-type")?.startsWith("application/json"))
     throw new Error("invalid_request");
   const reader = request.body?.getReader();
@@ -43,7 +46,7 @@ export async function smallJson(request: Request): Promise<unknown> {
       const { done, value } = await reader.read();
       if (done) break;
       total += value.byteLength;
-      if (total > 1024) {
+      if (total > maxBytes) {
         await reader.cancel();
         throw new Error("invalid_request");
       }

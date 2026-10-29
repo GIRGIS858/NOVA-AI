@@ -1,23 +1,11 @@
-import { test, expect, type APIResponse } from "@playwright/test";
+import { test, expect } from "@playwright/test";
 import Database from "better-sqlite3";
 import { randomUUID } from "node:crypto";
 import { readFile } from "node:fs/promises";
 import { projectStore } from "../src/lib/projects";
 import { generationStore } from "../src/lib/generation-store";
 
-// Other workflows share localhost's IP. Respect Better Auth's real signup limit
-// during fixture setup instead of disabling it or spoofing client addresses.
-async function signupFixture(create: () => Promise<APIResponse>) {
-  let response = await create();
-  if (response.status() === 429) {
-    const seconds = Number(response.headers()["x-retry-after"]);
-    expect(seconds).toBeGreaterThan(0);
-    expect(seconds).toBeLessThanOrEqual(10);
-    await new Promise((resolve) => setTimeout(resolve, seconds * 1000 + 100));
-    response = await create();
-  }
-  return response;
-}
+import { signupFixture } from "./fixture-signup";
 
 // Fixtures are persisted test artifacts, not provider output. No runtime mock mode exists.
 test("static versions, ownership, missing-provider gate, and cancellation", async ({

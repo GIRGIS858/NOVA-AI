@@ -27,9 +27,9 @@ Verified in this environment: TypeScript check, production build, 3 ownership/va
 
 Next vertical slice: one user prompt → an authorized run → structured file operations → a stored source version → isolated build → verified preview.
 
-Completed prerequisite: owner-scoped immutable source versions, structured writes/deletes, restoration, transactional stale-base protection, portable path validation, and file/byte/history limits. The service is internal and does not yet expose generation or execution. See `SOURCE-VERSIONS.md`. Latest checks: 27 unit tests, 4 browser workflows, types, production build, and repeatable migrations all passed.
+Completed prerequisite: owner-scoped immutable source versions, structured writes/deletes, restoration, transactional stale-base protection, portable path validation, and file/byte/history limits. The initial service was internal; the later milestones below add generation and manual editing through it. See `SOURCE-VERSIONS.md`. Latest checks: 27 unit tests, 4 browser workflows, types, production build, and repeatable migrations all passed.
 
-Required decisions: AI provider and reachable endpoint, runner infrastructure, secrets configuration, preview access mechanism. Introduce provider and runner interfaces, bounded execution, cancellation, scoped file paths, and failure recovery. Keep tests with fake providers separate from actual-provider validation.
+Remaining prerequisites: secure provider key/live validation, full-stack runner infrastructure and its preview access mechanism. Introduce provider and runner interfaces, bounded execution, cancellation, scoped file paths, and failure recovery. Keep tests with fake providers separate from actual-provider validation.
 
 ## 03 — Reliability and source versions
 
@@ -67,6 +67,8 @@ Generation remains disabled by default; simulated provider and fixture preview r
 - [x] Preserve main through `2b1486a`, including validated manual-source save/restore service and tests.
 - [x] Replace paid inference with a configurable, free-only OpenRouter adapter and catalog/price guards.
 - [x] Keep full hostile-preview, ownership, cancellation and source-history coverage.
-- [ ] Connect the manual-source save/restore service to owner-scoped HTTP endpoints and editor UI.
+- [x] Connect manual-source save/restore to owner-scoped HTTP routes and editor UI, including immutable history, conflict draft preservation and bilingual mobile checks.
 - [ ] Include the captured source snapshot in AI edit context; currently generation regenerates from brief/notes.
 - [ ] Benchmark free model quality on representative Arabic/English sites once the secure key is available.
+
+Latest integrated verification: 101 unit tests, 7 browser workflows, TypeScript and production build passed after adding the manual source editor. Static generation still awaits a secure OpenRouter key and real inference validation.

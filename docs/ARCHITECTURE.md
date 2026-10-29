@@ -39,3 +39,7 @@ The first provider adapter emits only HTML/CSS. Static artifact building validat
 ## Free inference boundary
 
 The only live adapter targets OpenRouter and permits explicit zero-priced `:free` models. Catalog pricing is checked before each inference, with fixed endpoints, redirects rejected, bounded response streams, inherited proxy/CA trust, a zero token-price ceiling and provider fallback disabled. `free-model.ts` owns the configurable ID; keys remain server-side. The public model catalog is not evidence of output quality or inference readiness. A secure key and real `ai:smoke` check remain external prerequisites. See `GENERATION.md`.
+
+## Manual source editing
+
+Owner/origin-checked HTTP routes call `staticSourceStore` for validated saves and restore-as-new snapshots. All source history reads use the canonical version store, so generated, edited and restored versions remain visible together. The editor keeps its captured base and in-memory draft during conflicts; no silent rebase or automatic retry occurs. Drafts can be downloaded before reconciliation. Manual actions consume no AI quota.

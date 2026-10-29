@@ -227,3 +227,44 @@
     padding: 17px 13px;
   }
 }
+
+.static-editor {
+  margin-top: 18px;
+  border-top: 1px solid #345052;
+  padding-top: 18px;
+}
+.static-editor h4 {
+  color: #d6eee8;
+  font-size: 15px;
+}
+.static-editor .generation-source {
+  margin-top: 12px;
+}
+.static-editor-label {
+  display: block;
+  background: #0a1417;
+  padding: 12px 14px 0;
+  color: #b9ced0;
+  font-size: 12px;
+}
+.static-editor textarea {
+  display: block;
+  width: 100%;
+  min-height: 300px;
+  resize: vertical;
+  border: 0;
+  border-radius: 0;
+  margin: 0;
+  padding: 14px;
+  background: #0a1417;
+  color: #d5eee6;
+  font:
+    12px/1.7 ui-monospace,
+    monospace;
+  text-align: left;
+  tab-size: 2;
+}
+.static-editor textarea:focus-visible {
+  outline: 2px solid #8fdbcf;
+  outline-offset: -2px;
+}

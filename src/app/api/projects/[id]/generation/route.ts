@@ -1,6 +1,7 @@
 import { freeModelConfig } from "@/lib/free-model";
 import { generationConfigured } from "@/lib/generation-config";
-import { generations } from "@/lib/db";
+import { generations, sourceVersions } from "@/lib/db";
+import { sourceMetadata } from "@/lib/source-metadata";
 import { authorizeProject, json } from "@/lib/generation-http";
 export const runtime = "nodejs";
 export async function GET(
@@ -12,7 +13,7 @@ export async function GET(
   if (auth.response) return auth.response;
   return json({
     runs: generations.runs(auth.owner!, id),
-    versions: generations.versions(auth.owner!, id),
+    versions: sourceVersions.list(auth.owner!, id).map(sourceMetadata),
     configured: generationConfigured(),
     model: freeModelConfig().model,
   });

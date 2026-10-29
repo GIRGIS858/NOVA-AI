@@ -12,7 +12,8 @@ import {
   CircleDashed,
 } from "lucide-react";
 import { requireUser } from "@/lib/auth";
-import { projects, generations } from "@/lib/db";
+import { projects, generations, sourceVersions } from "@/lib/db";
+import { sourceMetadata } from "@/lib/source-metadata";
 import { GenerationPanel } from "@/components/generation-panel";
 import { getLocale } from "@/lib/locale";
 import { saveMessage } from "@/app/actions";
@@ -151,7 +152,9 @@ export default async function Studio({
               configured={generationConfigured()}
               model={freeModelConfig().model}
               initialRuns={generations.runs(user.id, id)}
-              initialVersions={generations.versions(user.id, id)}
+              initialVersions={sourceVersions
+                .list(user.id, id)
+                .map(sourceMetadata)}
             />
             <div className="project-details">
               <span>{ar ? "آخر تحديث" : "Last updated"}</span>

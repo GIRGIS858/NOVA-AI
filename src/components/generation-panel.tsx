@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { StaticSourceEditor } from "./static-source-editor";
 import {
   Code2,
   Download,
@@ -18,7 +19,12 @@ type Run = {
   created_at: number;
   finished_at: number | null;
 };
-type VersionMeta = { id: string; created_at: number; run_id: string };
+type VersionMeta = {
+  id: string;
+  created_at: number;
+  number: number;
+  restored_from: string | null;
+};
 type SourceFile = { path: string; content: string };
 type VersionResponse = {
   version: { id: string; created_at: number; files: SourceFile[] };
@@ -107,8 +113,8 @@ function errorText(code: string, ar: boolean) {
         : "This version contains files that the static preview does not support. Preview supports HTML and CSS only.";
     case "conflict":
       return ar
-        ? "تغيّر إصدار المشروع أثناء التوليد. حدّث السجل قبل بدء محاولة جديدة."
-        : "The project version changed during generation. Refresh the history before starting another attempt.";
+        ? "تغيّر إصدار المشروع منذ فتحه. حدّث السجل وافتح النسخة الأحدث قبل المحاولة مجددًا."
+        : "The project version changed since it was opened. Refresh the history and open the latest version before trying again.";
     case "request_conflict":
     case "invalid_request":
       return ar
@@ -160,6 +166,13 @@ export function GenerationPanel({
   const [versionRetry, setVersionRetry] = useState(0);
   const [view, setView] = useState<"preview" | "source">("preview");
   const [sourcePath, setSourcePath] = useState("index.html");
+  const [editor, setEditor] = useState<{
+    baseVersionId: string | null;
+    files: SourceFile[];
+  } | null>(null);
+  const [restoring, setRestoring] = useState(false);
+  const restoreInFlight = useRef(false);
+  const [sourceNotice, setSourceNotice] = useState("");
   const requestInFlight = useRef(false);
   const historyInFlight = useRef<Promise<HistoryResponse> | null>(null);
   const active = runs.find((run) => run.status === "running");
@@ -230,7 +243,8 @@ export function GenerationPanel({
   }, [base, selected, versionRetry]);
 
   async function generate() {
-    if (requestInFlight.current || active || !ready) return;
+    if (requestInFlight.current || active || !ready || editor || restoring)
+      return;
     requestInFlight.current = true;
     setPending(true);
     setError("");
@@ -284,6 +298,64 @@ export function GenerationPanel({
       setError("request_failed");
     } finally {
       setRefreshing(false);
+    }
+  }
+
+  function sourceSaved(version: VersionMeta) {
+    setEditor(null);
+    setVersions((current) => [
+      version,
+      ...current.filter((v) => v.id !== version.id),
+    ]);
+    setSelected(version.id);
+    setView("preview");
+    setError("");
+    setSourceNotice(
+      ar
+        ? "حُفظ إصدار جديد ويمكنك معاينته الآن."
+        : "A new version was saved and is ready to preview.",
+    );
+    void (async () => {
+      await historyInFlight.current?.catch(() => undefined);
+      await refreshHistory(true);
+    })().catch(() => setError("request_failed"));
+  }
+
+  async function restoreVersion() {
+    const latest = versions[0]?.id;
+    if (
+      restoreInFlight.current ||
+      !latest ||
+      !selected ||
+      latest === selected ||
+      editor
+    )
+      return;
+    if (
+      !window.confirm(
+        ar
+          ? "استعادة هذا الإصدار كنسخة جديدة؟ ستبقى جميع النسخ السابقة محفوظة."
+          : "Restore this version as a new snapshot? All previous versions will be retained.",
+      )
+    )
+      return;
+    restoreInFlight.current = true;
+    setRestoring(true);
+    setError("");
+    try {
+      const result = await readResponse<{ version: VersionMeta }>(
+        await fetch(`${base}/source/restore`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ baseVersionId: latest, versionId: selected }),
+        }),
+      );
+      sourceSaved(result.version);
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : "source_failed");
+    } finally {
+      restoreInFlight.current = false;
+      setRestoring(false);
     }
   }
 
@@ -354,7 +426,9 @@ export function GenerationPanel({
           className="button primary small"
           type="button"
           onClick={() => void generate()}
-          disabled={!ready || pending || Boolean(active)}
+          disabled={
+            !ready || pending || Boolean(active) || Boolean(editor) || restoring
+          }
         >
           {pending || active ? (
             <LoaderCircle size={15} className="spin" aria-hidden="true" />
@@ -415,6 +489,79 @@ export function GenerationPanel({
             : ""}
       </div>
 
+      <div className="generation-actions">
+        <button
+          className="button ghost small"
+          type="button"
+          disabled={
+            Boolean(editor) ||
+            pending ||
+            Boolean(active) ||
+            restoring ||
+            (versions.length > 0 &&
+              (!versionData ||
+                versionData.version.id !== selected ||
+                selected !== versions[0].id))
+          }
+          onClick={() => {
+            setSourceNotice("");
+            setEditor({
+              baseVersionId: versions[0]?.id || null,
+              files: versionData?.version.files || [
+                { path: "index.html", content: "" },
+                { path: "styles.css", content: "" },
+              ],
+            });
+          }}
+        >
+          <Code2 size={15} aria-hidden="true" />
+          {versions.length
+            ? ar
+              ? "عدّل النسخة الأحدث"
+              : "Edit latest version"
+            : ar
+              ? "أضف ملفات يدويًا"
+              : "Add files manually"}
+        </button>
+        {versions.length > 0 && selected !== versions[0].id && (
+          <button
+            className="button ghost small"
+            type="button"
+            disabled={
+              Boolean(editor) ||
+              restoring ||
+              pending ||
+              Boolean(active) ||
+              !versionData
+            }
+            onClick={() => void restoreVersion()}
+          >
+            {restoring
+              ? ar
+                ? "جارٍ الاستعادة…"
+                : "Restoring…"
+              : ar
+                ? "استعد كإصدار جديد"
+                : "Restore as a new version"}
+          </button>
+        )}
+      </div>
+      {sourceNotice && (
+        <p role="status" className="generation-preview-note">
+          {sourceNotice}
+        </p>
+      )}
+      {editor && (
+        <StaticSourceEditor
+          projectId={projectId}
+          ar={ar}
+          baseVersionId={editor.baseVersionId}
+          initialFiles={editor.files}
+          onSaved={sourceSaved}
+          onClose={() => setEditor(null)}
+          errorMessage={(code) => errorText(code, ar)}
+        />
+      )}
       {versions.length > 0 && (
         <div className="generation-version">
           <label htmlFor="source-version">
@@ -422,12 +569,18 @@ export function GenerationPanel({
             <select
               id="source-version"
               value={selected}
+              disabled={Boolean(editor) || restoring}
               onChange={(event) => setSelected(event.target.value)}
             >
-              {versions.map((version, index) => (
+              {versions.map((version) => (
                 <option key={version.id} value={version.id}>
-                  {ar ? "نسخة" : "Version"} {versions.length - index} ·{" "}
+                  {ar ? "نسخة" : "Version"} {version.number} ·{" "}
                   {date(version.created_at)}
+                  {version.restored_from
+                    ? ar
+                      ? " · مستعاد"
+                      : " · restored"
+                    : ""}
                 </option>
               ))}
             </select>

@@ -9,6 +9,7 @@ A new Arabic/English platform for building websites through conversation. This r
 - Email/password accounts and sessions using Better Auth, with database-backed rate limits.
 - Owner-scoped project creation, listing, notes, and deletion with confirmation.
 - A studio that persists briefs/notes and displays saved HTML/CSS versions, source files, JSON downloads, and sandboxed static previews.
+- Manual HTML/CSS editor with immutable saves, version restoration, and preserved on-page drafts when another session changes the source. No AI key is needed for manual editing.
 - Product status and milestone documentation.
 - Immutable source snapshots with ownership, concurrency checks and resource limits, now integrated with generation runs.
 - Free-only OpenRouter adapter with bounded, validated JSON output, cancellation, request idempotency and persistent attempt limits. Live generation is disabled until configured and validated.
@@ -69,7 +70,9 @@ A run captures its base source version before calling the model. Newer source ed
 
 Only `index.html` and `styles.css` are supported by this generator. Preview construction sanitizes HTML, removes active content, escapes style-tag boundaries, and adds a restrictive CSP. The iframe has an empty sandbox and an opaque origin: scripts, forms, external resources and parent access are disabled. Source files remain untrusted; the JSON download contains original source, not a vetted deployment bundle. A preview is local browser rendering, not a published site or an isolated application build worker.
 
-See [generation boundaries and validation](docs/GENERATION.md).
+Use **Add files manually** in a project to create HTML/CSS without an AI key. Saving appends a new version and updates its isolated preview. Select an earlier version to restore it as a new snapshot. Concurrent changes produce a conflict and preserve the on-page draft; download or copy it before opening the latest source. Save before navigating away.
+
+See [generation boundaries and validation](docs/GENERATION.md) and [source editor behavior](docs/SOURCE-VERSIONS.md).
 
 ## Storage and migrations
 
