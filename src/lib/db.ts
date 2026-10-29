@@ -3,6 +3,7 @@ import { mkdirSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { projectStore } from "./projects";
 import { sourceVersionStore } from "./versions";
+import { generationRunStore } from "./generation-runs";
 
 const path = resolve(process.env.NOVA_DATABASE_PATH || "./data/nova.sqlite");
 mkdirSync(dirname(path), { recursive: true });
@@ -11,3 +12,4 @@ db.pragma("journal_mode = WAL");
 db.pragma("foreign_keys = ON");
 export const projects = projectStore(db);
 export const sourceVersions = sourceVersionStore(db);
+export const generationRuns = generationRunStore(db);

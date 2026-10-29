@@ -39,6 +39,8 @@ export default defineConfig({
       BETTER_AUTH_URL: baseURL,
       NOVA_DATABASE_PATH: resolve("data", "e2e", `${randomUUID()}.sqlite`),
       NEXT_TELEMETRY_DISABLED: "1",
+      NOVA_AI_API_KEY: "",
+      NOVA_AI_MODEL: "poolside/laguna-s-2.1:free",
     },
   },
   reporter: [["list"], ["html", { open: "never" }]],

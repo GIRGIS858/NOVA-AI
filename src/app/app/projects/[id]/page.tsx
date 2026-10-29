@@ -17,6 +17,7 @@ import { getLocale } from "@/lib/locale";
 import { saveMessage } from "@/app/actions";
 import { DeleteProject } from "@/components/delete-project";
 import { ClearCreatedDraft } from "@/components/brief-input";
+import { GenerationPanel } from "@/components/generation-panel";
 export const metadata = { title: "Project studio" };
 export default async function Studio({
   params,
@@ -69,8 +70,8 @@ export default async function Studio({
               <CircleDashed size={17} />
               <p>
                 {ar
-                  ? "احفظ متطلباتك وملاحظاتك هنا. توليد الشيفرة غير مفعّل في هذه المرحلة؛ لن تُرسل الملاحظات إلى مزوّد AI ولن يُخصم أي رصيد."
-                  : "Capture your requirements and notes here. Code generation is not enabled in this release. Notes are not sent to an AI provider and no credits are charged."}
+                  ? "احفظ ملاحظاتك هنا. لا تُرسل الملاحظات تلقائيًا إلى مزوّد AI؛ استخدم لوحة البناء لطلب توليد الشيفرة."
+                  : "Save your notes here. Notes are not automatically sent to an AI provider; use the build panel to request source generation."}
               </p>
             </div>
             {messages.map((m) => (
@@ -143,18 +144,19 @@ export default async function Studio({
               <h3>{ar ? "الوصف الأساسي" : "The brief"}</h3>
               <p>{project.brief}</p>
             </section>
+            <GenerationPanel id={id} ar={ar} />
             <div className="preview-placeholder">
               <PanelsTopLeft size={34} strokeWidth={1} />
               <div>
                 <h3>
                   {ar
-                    ? "المعاينة تأتي في المرحلة التالية"
-                    : "Preview is the next milestone"}
+                    ? "تشغيل التطبيقات الكاملة قادم"
+                    : "Full application execution is next"}
                 </h3>
                 <p>
                   {ar
-                    ? "تحتاج توليد ملفات ومشغّلًا معزولًا. لا توجد معاينة أو عملية نشر نشطة لهذا المشروع."
-                    : "It requires generated files and an isolated runner. This project has no active preview or deployment."}
+                    ? "المعاينة الحالية ثابتة بلا JavaScript أو شبكة. تشغيل التطبيقات الديناميكية والنشر يحتاجان مشغّلًا معزولًا في مرحلة لاحقة."
+                    : "The current preview is static, with no JavaScript or network access. Dynamic applications and publishing require a separate isolated runner."}
                 </p>
               </div>
               <Link className="text-link" href="/roadmap">

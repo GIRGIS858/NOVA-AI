@@ -47,6 +47,26 @@ test("Arabic account → persisted project → notes → ownership → sign out"
   await page.getByRole("button", { name: "أنشئ المشروع", exact: true }).click();
   await expect(page).toHaveURL(/\/app\/projects\//);
   const url = page.url();
+  const generationPath =
+    new URL(url).pathname.replace("/app/projects/", "/api/projects/") +
+    "/generation";
+  await expect(
+    page.getByRole("button", { name: "ولّد الشيفرة مجانًا" }),
+  ).toBeDisabled();
+  const status = await page.request.get(generationPath);
+  expect(status.status()).toBe(200);
+  expect((await status.json()).config.configured).toBe(false);
+  const badOrigin = await page.request.post(generationPath, {
+    headers: { Origin: "https://other.invalid" },
+    data: { requestId: randomUUID(), prompt: "Build a portfolio page" },
+  });
+  expect(badOrigin.status()).toBe(403);
+  const missingKey = await page.request.post(generationPath, {
+    headers: { Origin: baseURL! },
+    data: { requestId: randomUUID(), prompt: "Build a portfolio page" },
+  });
+  expect(missingKey.status()).toBe(503);
+  expect((await missingKey.json()).error).toBe("NOT_CONFIGURED");
   await page
     .getByLabel("أضف تفاصيل إلى المشروع")
     .fill("استخدم ألوانًا ترابية وخطًا عربيًا واضحًا.");
@@ -75,6 +95,9 @@ test("Arabic account → persisted project → notes → ownership → sign out"
 
   const other = await browser.newContext();
   const otherPage = await other.newPage();
+  expect(
+    (await other.request.get(`${baseURL}${generationPath}`)).status(),
+  ).toBe(401);
   const signup = await other.request.post(`${baseURL}/api/auth/sign-up/email`, {
     headers: { Origin: baseURL! },
     data: {
@@ -84,6 +107,9 @@ test("Arabic account → persisted project → notes → ownership → sign out"
     },
   });
   expect(signup.ok()).toBe(true);
+  expect(
+    (await other.request.get(`${baseURL}${generationPath}`)).status(),
+  ).toBe(404);
   await otherPage.goto(url);
   await expect(otherPage.getByText("هذه الصفحة غير متاحة.")).toBeVisible();
   await expect(
