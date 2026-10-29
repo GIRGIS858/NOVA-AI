@@ -6,6 +6,10 @@ import {
   MAX_PROMPT_CHARS,
 } from "./ai-provider";
 import { buildPreview } from "./static-artifact";
+import {
+  generationContext,
+  latestNotesWithinBudget,
+} from "./generation-context";
 
 export async function runGeneration(
   input: {
@@ -52,8 +56,16 @@ export async function runGeneration(
       .join("\n\n");
     const prefix = `Project: ${project.name}\nBrief:\n${project.brief}\n\nLatest saved notes (older content may be omitted):\n`;
     const prompt =
-      prefix + notes.slice(-Math.max(1, MAX_PROMPT_CHARS - prefix.length));
-    const files = await provider({ prompt, apiKey: input.apiKey, signal });
+      prefix + latestNotesWithinBudget(notes, MAX_PROMPT_CHARS - prefix.length);
+    // Fail before contacting a provider if the complete captured snapshot cannot fit.
+    generationContext(prompt, reservation.source);
+    signal.throwIfAborted();
+    const files = await provider({
+      prompt,
+      source: reservation.source,
+      apiKey: input.apiKey,
+      signal,
+    });
     if (signal.aborted)
       throw new ProviderError(
         signal.reason?.name === "TimeoutError" ? "timeout" : "cancelled",

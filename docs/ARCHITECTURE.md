@@ -32,7 +32,7 @@ AI orchestration and untrusted project execution must be separate concerns. A fu
 
 ## Static generation integration
 
-Generation uses the canonical source-version store with captured bases and conflict rejection. Explicit migrations add a separate run state machine and a retained attempt ledger. Failed/cancelled/deleted attempts still count toward rolling quotas; cancellation reserves concurrency until acknowledgement or lease expiry.
+Generation uses the canonical source-version store with captured bases and conflict rejection. The reservation returns an in-memory copy of the exact base files under the same transaction. The worker and provider adapter validate the complete JSON context before network use; source is never truncated to fit. Explicit migrations add a separate run state machine and a retained attempt ledger. Failed/cancelled/deleted attempts still count toward rolling quotas; cancellation reserves concurrency until acknowledgement or lease expiry.
 
 The first provider adapter emits only HTML/CSS. Static artifact building validates/sanitizes strings and never executes generated code. Browser previews have an opaque iframe origin, empty sandbox and restrictive CSP; generated source is never served as application-origin HTML. Full-stack execution still requires the isolated worker described above. Live generation is gated by both a server-side credential and explicit activation after the real provider smoke check. See docs/GENERATION.md.
 

@@ -76,4 +76,4 @@ Browser coverage exercises create → edit → restore, retained earlier content
 
 ## Next integration
 
-Include the captured source version in AI edit context with explicit limits. Build a separately isolated runner for JavaScript/full-stack execution and verify readiness before exposing it. Never run generated application code inside Nova's web process.
+AI edit context now contains the complete snapshot captured with the run’s base version, bounded to 256 KiB after JSON encoding. Review real model edit quality once a key is supplied. Build a separately isolated runner for JavaScript/full-stack execution and verify readiness before exposing it. Never run generated application code inside Nova's web process.

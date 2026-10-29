@@ -71,6 +71,7 @@ const failureCodes = new Set([
   "catalog_unavailable",
   "rate_limited",
   "auth_failed",
+  "context_limit",
   "provider_error",
   "provider_timeout",
   "invalid_output",
@@ -202,7 +203,7 @@ export function generationStore(db: Database.Database) {
               throw new GenerationStoreError("request_conflict");
             const run = findRun(owner, prior.run_id);
             if (!run) throw new GenerationStoreError("request_conflict");
-            return { run, existing: true };
+            return { run, existing: true as const };
           }
           const base = sources.latest(owner, projectId);
           if (base && base.number >= SOURCE_LIMITS.versions)
@@ -268,7 +269,13 @@ export function generationStore(db: Database.Database) {
           db.prepare(
             "INSERT INTO generation_attempts VALUES (?, ?, ?, ?, ?, NULL)",
           ).run(owner, requestId, projectId, run.id, now);
-          return { run, existing: false };
+          // Capture the exact files under the same lock as base_version_id.
+          // Only the worker receives this context; public run responses omit it.
+          return {
+            run,
+            existing: false as const,
+            source: { versionId: base?.id ?? null, files: base?.files ?? [] },
+          };
         })
         .immediate();
     },

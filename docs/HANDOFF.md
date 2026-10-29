@@ -16,12 +16,12 @@ Each request requires an explicit `:free` ID, a live catalog entry with all decl
 
 Current limits: 90-second operation, 12,000 output tokens, 16,000 prompt characters, 3 attempts/account and 20/environment per rolling 24 hours, 1 active/account and 3 globally. Attempts persist across project deletion; cancellation holds concurrency until acknowledged or a 120-second lease expires. Runs execute inside request lifetimes, not a durable background queue. No automatic retries.
 
-Generation regenerates exactly `index.html` + `styles.css` from saved brief and latest notes. It does **not yet include current source in model context**. Source commits capture the base and reject concurrent edits. The preview sanitizer and empty-sandbox iframe disable scripts, forms, external resources and parent access. Source downloads contain original untrusted code. This is a static HTML/CSS preview, not a full-stack application runner or public deployment.
+Generation produces exactly `index.html` + `styles.css` from saved brief, latest notes and the complete captured source snapshot. Existing files use edit mode with preservation instructions; new projects use create mode. The whole encoded context is capped at 256 KiB UTF-8 and source is never truncated. Source commits capture the base and reject concurrent edits. The preview sanitizer and empty-sandbox iframe disable scripts, forms, external resources and parent access. Source downloads contain original untrusted code. This is a static HTML/CSS preview, not a full-stack application runner or public deployment.
 
 ## Verified evidence
 
 - `npm run typecheck`: passed.
-- `npm test`: 101 tests passed, including free-price guards and all retained source/store tests.
+- `npm test`: 113 tests passed, including source-aware context, free-price guards and all retained source/store tests.
 - `npm run build`: passed.
 - `npm run test:e2e`: all 7 workflows passed against isolated production server/database. Includes ownership, cancellation, source download, mobile RTL/LTR and hostile iframe isolation.
 - `npm run setup:local` and repeated `db:migrate`: verified in this environment.
@@ -37,7 +37,7 @@ Run `npm run ai:smoke` (one free-only request consuming quota), then set `NOVA_A
 
 ## Next work
 
-1. Include the captured source snapshot in AI edit context, with explicit byte limits and preservation of existing work.
+1. Add a readable comparison of source versions so users can review generated/manual changes before restoring or exporting.
 2. Once the key is provided, validate actual inference and compare free models on Arabic/English site quality. Keep it disabled until validated.
 3. Add a separately isolated worker for generated JavaScript/full-stack builds, resource/network policies and verified readiness. Never execute generated code inside the Next.js process.
 4. Billing, shared teams, publication, email verification/recovery, backups, operational controls and production hardening remain planned.
@@ -57,3 +57,9 @@ Added `POST /api/projects/:id/source` and `/source/restore`, using the existing 
 Users can create HTML/CSS without a provider key, edit the latest version, download drafts and restore a historical version as a new snapshot. An editor captures its base at opening; background refresh cannot silently rebase it. A stale save returns 409 while retaining the local draft. Explicit close confirms discarding changes; full reload warns when dirty. Drafts remain in page memory, so save before application navigation. Manual saves consume no AI attempt quota.
 
 New browser coverage exercises create/edit/restore, retained original snapshots, concurrent-save rejection, draft retention, cross-user/origin restrictions, invalid/oversized input, and mobile Arabic/English. Final validation: TypeScript, all 101 unit tests, production build and all 7 browser workflows passed. The new workflow uses manual fixture source and does not invoke AI. The initial browser attempt stalled on an exact label locator that included option text; the final check uses the accessible combobox role and retains all assertions.
+
+## Latest milestone — source-aware AI context
+
+Generation reservations now capture exact base-version files inside the transaction; subsequent source edits cannot silently change the data sent to AI. `generation-context.ts` validates static file shape, creates a JSON envelope, preserves full Unicode source and rejects oversized encoded payloads before a provider call. The system instruction distinguishes initial creation from edits and requests preservation of unrequested content/design. Actual model quality still awaits a credential and live validation; prior snapshots remain immutable. The UI explicitly discloses transmission of saved source alongside brief/notes.
+
+Tests cover manual/restored input, concurrent edits between reservation and provider start, owner isolation, JSON escaping/UTF-8 limits, complete-file preservation and absence of server credentials in model messages. Checkpoint validation: TypeScript, all 113 unit tests, production build and all 7 browser workflows passed. No live provider inference was performed.

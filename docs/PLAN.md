@@ -68,7 +68,9 @@ Generation remains disabled by default; simulated provider and fixture preview r
 - [x] Replace paid inference with a configurable, free-only OpenRouter adapter and catalog/price guards.
 - [x] Keep full hostile-preview, ownership, cancellation and source-history coverage.
 - [x] Connect manual-source save/restore to owner-scoped HTTP routes and editor UI, including immutable history, conflict draft preservation and bilingual mobile checks.
-- [ ] Include the captured source snapshot in AI edit context; currently generation regenerates from brief/notes.
+- [x] Include complete captured source in AI edit context, enforce encoded UTF-8 limits, and preserve newer manual edits on conflicts.
 - [ ] Benchmark free model quality on representative Arabic/English sites once the secure key is available.
 
 Latest integrated verification: 101 unit tests, 7 browser workflows, TypeScript and production build passed after adding the manual source editor. Static generation still awaits a secure OpenRouter key and real inference validation.
+
+Source-aware context checkpoint: 113 unit tests, all 7 browser workflows, TypeScript and production build passed. Live inference remains blocked on the secure key.

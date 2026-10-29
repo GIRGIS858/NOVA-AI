@@ -99,6 +99,10 @@ function errorText(code: string, ar: boolean) {
       return ar
         ? "أُلغيت المحاولة. قد تبقى محسوبة ضمن حصة المزوّد المجانية."
         : "The attempt was cancelled. It may still count against the provider’s free quota.";
+    case "context_limit":
+      return ar
+        ? "حجم وصف المشروع وملفاته يتجاوز حد طلب AI. لم نرسل ملفات ناقصة؛ قلّل الحجم أو تابع بالمحرّر اليدوي."
+        : "The project requirements and files exceed the AI context limit. No partial files were sent; reduce the size or use the manual editor.";
     case "invalid_output":
       return ar
         ? "لم يجتز الناتج فحص الملفات. لم تُحفظ نسخة جديدة."
@@ -405,8 +409,8 @@ export function GenerationPanel({
       </div>
       <p className="generation-description">
         {ar
-          ? "ولّد موقعًا ثابتًا من الوصف والملاحظات المحفوظة. تُرسل هذه التفاصيل إلى OpenRouter ومزوّد النموذج عند بدء التوليد. نسمح فقط بنموذج مجاني متحقق من سعره؛ لا تضع أسرارًا في الوصف أو الملاحظات."
-          : "Generate a static website from your saved brief and notes. Starting generation sends them to OpenRouter and the model provider. Only a verified zero-priced model is allowed; keep secrets out of briefs and notes."}
+          ? "ابنِ أو طوّر الموقع باستخدام الوصف والملاحظات وأحدث ملفات HTML/CSS المحفوظة. تُرسل هذه البيانات إلى OpenRouter ومزوّد النموذج عند بدء التوليد. نسمح فقط بنموذج مجاني متحقق من سعره؛ لا تضع أسرارًا في الوصف أو الملاحظات أو الملفات."
+          : "Build or update the website using its brief, saved notes and latest saved HTML/CSS files. Starting generation sends this data to OpenRouter and the model provider. Only a verified zero-priced model is allowed; keep secrets out of briefs, notes and files."}
       </p>
       <p className="generation-limits" dir="ltr">
         OpenRouter · {currentModel}
