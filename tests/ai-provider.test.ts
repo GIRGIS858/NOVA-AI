@@ -1,12 +1,12 @@
 import { describe, expect, it, vi } from "vitest";
 import {
   generateStaticSite,
-  AI_MODEL,
   MAX_OUTPUT_TOKENS,
   MAX_PROMPT_CHARS,
   ProviderError,
   type ProviderTransport,
 } from "../src/lib/ai-provider";
+import { DEFAULT_FREE_MODEL } from "../src/lib/free-model";
 const response = (content: string, finish_reason = "stop") => ({
   choices: [{ finish_reason, message: { content, refusal: null } }],
 });
@@ -15,7 +15,7 @@ const input = () => ({
   apiKey: "unit-test-credential",
   signal: new AbortController().signal,
 });
-describe("OpenAI adapter with mocked transport (no live API calls)", () => {
+describe("OpenRouter free adapter with mocked transport (no live API calls)", () => {
   it("sets bounded structured output and never embeds credentials in model messages", async () => {
     const transport = vi
       .fn<ProviderTransport>()
@@ -27,9 +27,12 @@ describe("OpenAI adapter with mocked transport (no live API calls)", () => {
     const files = await generateStaticSite(input(), transport);
     expect(files.map((f) => f.path)).toEqual(["index.html", "styles.css"]);
     const body = transport.mock.calls[0][0];
-    expect(body.model).toBe(AI_MODEL);
-    expect(body.max_completion_tokens).toBe(MAX_OUTPUT_TOKENS);
-    expect(body.store).toBe(false);
+    expect(body.model).toBe(DEFAULT_FREE_MODEL);
+    expect(body.max_tokens).toBe(MAX_OUTPUT_TOKENS);
+    expect(body.provider).toEqual({
+      allow_fallbacks: false,
+      max_price: { prompt: 0, completion: 0 },
+    });
     expect(JSON.stringify(body)).not.toContain("unit-test-credential");
   });
   it.each([

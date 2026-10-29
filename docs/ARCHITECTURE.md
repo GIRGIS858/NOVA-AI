@@ -2,7 +2,7 @@
 
 ## Application
 
-Next.js App Router, React, TypeScript, and plain CSS tokens. Server components fetch private data; server actions mutate it. Client components are limited to authentication and interactive confirmations. The application is a modular monolith, not a collection of premature microservices.
+Next.js App Router, React, TypeScript, and plain CSS tokens. Server components fetch private data; server actions mutate it. Client components handle authentication, draft composition, generation status and version previews. The application is a modular monolith, not a collection of premature microservices.
 
 ## Identity
 
@@ -20,7 +20,7 @@ Locale is validated into `ar | en` and stored in an HTTP-only same-site cookie. 
 
 ## Scope honesty
 
-The studio stores notes, not AI results. Its generation, preview, credits, and deployment states are explicitly unavailable. Homepage examples are CSS illustrations labeled as illustrative directions. They are not generated projects, customer data, or active templates.
+The studio stores notes and validated source snapshots. Static generation is gated on secure provider configuration and activation; previews are sanitized HTML/CSS. Credits and deployment remain unavailable. Homepage examples are CSS illustrations labeled as illustrative directions. They are not generated projects, customer data, or active templates.
 
 ## Next engineering boundary
 
@@ -35,3 +35,7 @@ AI orchestration and untrusted project execution must be separate concerns. A fu
 Generation uses the canonical source-version store with captured bases and conflict rejection. Explicit migrations add a separate run state machine and a retained attempt ledger. Failed/cancelled/deleted attempts still count toward rolling quotas; cancellation reserves concurrency until acknowledgement or lease expiry.
 
 The first provider adapter emits only HTML/CSS. Static artifact building validates/sanitizes strings and never executes generated code. Browser previews have an opaque iframe origin, empty sandbox and restrictive CSP; generated source is never served as application-origin HTML. Full-stack execution still requires the isolated worker described above. Live generation is gated by both a server-side credential and explicit activation after the real provider smoke check. See docs/GENERATION.md.
+
+## Free inference boundary
+
+The only live adapter targets OpenRouter and permits explicit zero-priced `:free` models. Catalog pricing is checked before each inference, with fixed endpoints, redirects rejected, bounded response streams, inherited proxy/CA trust, a zero token-price ceiling and provider fallback disabled. `free-model.ts` owns the configurable ID; keys remain server-side. The public model catalog is not evidence of output quality or inference readiness. A secure key and real `ai:smoke` check remain external prerequisites. See `GENERATION.md`.

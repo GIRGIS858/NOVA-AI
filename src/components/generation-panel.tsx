@@ -28,14 +28,32 @@ type HistoryResponse = {
   runs: Run[];
   versions: VersionMeta[];
   configured: boolean;
+  model: string;
 };
 
 function errorText(code: string, ar: boolean) {
   switch (code) {
     case "not_configured":
       return ar
-        ? "التوليد غير مهيّأ بعد. يحتاج مسؤول البيئة إلى إعداد مزوّد الذكاء الاصطناعي."
-        : "Generation is not configured yet. The environment owner needs to configure the AI provider.";
+        ? "التوليد غير مهيّأ بعد. أضف مفتاح OpenRouter في إعدادات البيئة واختبر الاتصال المجاني ثم فعّله."
+        : "Generation is not configured yet. Add an OpenRouter key in environment settings, validate the free connection, then enable it.";
+    case "free_model_required":
+    case "free_model_unavailable":
+      return ar
+        ? "النموذج المجاني المحدد غير متاح أو لم يعد سعره صفرًا. اختر نموذجًا مجانيًا آخر في إعدادات البيئة."
+        : "The selected free model is unavailable or no longer zero-priced. Configure another free model.";
+    case "rate_limited":
+      return ar
+        ? "بلغت حصة المزوّد المجانية حدها. حاول لاحقًا."
+        : "The provider’s free quota has been reached. Try again later.";
+    case "auth_failed":
+      return ar
+        ? "رفض المزوّد مفتاح الاتصال. راجع إعدادات البيئة."
+        : "The provider rejected the credential. Check environment settings.";
+    case "catalog_unavailable":
+      return ar
+        ? "تعذّر التحقق من السعر المجاني. أوقفنا الطلب قبل التوليد."
+        : "Free pricing could not be verified. The request stopped before generation.";
     case "forbidden":
       return ar
         ? "تعذّر التحقق من هذا الطلب. حدّث الصفحة وحاول مجددًا."
@@ -73,8 +91,8 @@ function errorText(code: string, ar: boolean) {
         : "The attempt timed out or was interrupted. No new version was saved; you can start another attempt.";
     case "cancelled":
       return ar
-        ? "أُلغيت المحاولة. الإلغاء لا يضمن إلغاء تكلفة المزوّد."
-        : "The attempt was cancelled. Cancellation does not guarantee a provider refund.";
+        ? "أُلغيت المحاولة. قد تبقى محسوبة ضمن حصة المزوّد المجانية."
+        : "The attempt was cancelled. It may still count against the provider’s free quota.";
     case "invalid_output":
       return ar
         ? "لم يجتز الناتج فحص الملفات. لم تُحفظ نسخة جديدة."
@@ -116,18 +134,21 @@ export function GenerationPanel({
   projectId,
   ar,
   configured,
+  model,
   initialRuns,
   initialVersions,
 }: {
   projectId: string;
   ar: boolean;
   configured: boolean;
+  model: string;
   initialRuns: Run[];
   initialVersions: VersionMeta[];
 }) {
   const [runs, setRuns] = useState(initialRuns);
   const [versions, setVersions] = useState(initialVersions);
   const [ready, setReady] = useState(configured);
+  const [currentModel, setCurrentModel] = useState(model);
   const [pending, setPending] = useState(false);
   const [cancelling, setCancelling] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
@@ -157,6 +178,7 @@ export function GenerationPanel({
         setRuns(result.runs);
         setVersions(result.versions);
         setReady(result.configured);
+        setCurrentModel(result.model);
         setSelected((current) =>
           preferLatest ||
           !result.versions.some((version) => version.id === current)
@@ -311,8 +333,11 @@ export function GenerationPanel({
       </div>
       <p className="generation-description">
         {ar
-          ? "ولّد موقعًا ثابتًا من الوصف والملاحظات المحفوظة. تُرسل هذه التفاصيل إلى مزوّد AI عند بدء التوليد؛ تطبّق رسوم المزوّد."
-          : "Generate a static website from your saved brief and notes. Starting generation sends those details to the AI provider; provider charges apply."}
+          ? "ولّد موقعًا ثابتًا من الوصف والملاحظات المحفوظة. تُرسل هذه التفاصيل إلى OpenRouter ومزوّد النموذج عند بدء التوليد. نسمح فقط بنموذج مجاني متحقق من سعره؛ لا تضع أسرارًا في الوصف أو الملاحظات."
+          : "Generate a static website from your saved brief and notes. Starting generation sends them to OpenRouter and the model provider. Only a verified zero-priced model is allowed; keep secrets out of briefs and notes."}
+      </p>
+      <p className="generation-limits" dir="ltr">
+        OpenRouter · {currentModel}
       </p>
       <p className="generation-limits">
         {ar
@@ -383,8 +408,8 @@ export function GenerationPanel({
       <div className="generation-live" role="status" aria-live="polite">
         {active
           ? ar
-            ? "المحاولة جارية. يمكنك إلغاؤها؛ قد تبقى رسوم المزوّد مستحقة."
-            : "An attempt is running. You can cancel it; provider charges may still apply."
+            ? "المحاولة جارية. يمكنك إلغاؤها؛ قد تبقى محسوبة ضمن الحصة المجانية."
+            : "An attempt is running. You can cancel it; it may still count against the free quota."
           : runs[0]
             ? statusLabel(runs[0].status)
             : ""}

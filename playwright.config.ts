@@ -50,6 +50,8 @@ export default defineConfig({
       NOVA_DATABASE_PATH: databasePath,
       NOVA_E2E_DATABASE_PATH: databasePath,
       NOVA_AI_API_KEY: "",
+      NOVA_AI_ENABLED: "0",
+      NOVA_AI_MODEL: "thinkingmachines/inkling:free",
       NEXT_TELEMETRY_DISABLED: "1",
     },
   },

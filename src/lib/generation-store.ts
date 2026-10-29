@@ -65,6 +65,12 @@ const filesSchema = z
   .length(2)
   .refine((files) => new Set(files.map((f) => f.path)).size === 2);
 const failureCodes = new Set([
+  "not_configured",
+  "free_model_required",
+  "free_model_unavailable",
+  "catalog_unavailable",
+  "rate_limited",
+  "auth_failed",
   "provider_error",
   "provider_timeout",
   "invalid_output",

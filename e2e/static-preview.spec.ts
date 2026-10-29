@@ -1,5 +1,19 @@
 import { expect, test } from "@playwright/test";
-import { buildPreview } from "../src/lib/static-artifact";
+import { execFileSync } from "node:child_process";
+// Use Node's loader for sanitize-html's CJS -> ESM dependency, not Playwright's.
+function buildPreview(files: Array<{ path: string; content: string }>) {
+  return execFileSync(
+    process.execPath,
+    [
+      "--import",
+      "tsx",
+      "--input-type=module",
+      "-e",
+      "import { buildPreview } from './src/lib/static-artifact.ts'; import { readFileSync } from 'node:fs'; process.stdout.write(buildPreview(JSON.parse(readFileSync(0, 'utf8'))));",
+    ],
+    { input: JSON.stringify(files), encoding: "utf8" },
+  );
+}
 
 // Hostile fixture artifacts exercise the preview boundary without an AI provider.
 // These are test inputs, not generated output or evidence of live-provider success.

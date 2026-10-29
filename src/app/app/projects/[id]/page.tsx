@@ -1,3 +1,4 @@
+import { freeModelConfig } from "@/lib/free-model";
 import { generationConfigured } from "@/lib/generation-config";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -148,6 +149,7 @@ export default async function Studio({
               projectId={id}
               ar={ar}
               configured={generationConfigured()}
+              model={freeModelConfig().model}
               initialRuns={generations.runs(user.id, id)}
               initialVersions={generations.versions(user.id, id)}
             />

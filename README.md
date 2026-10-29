@@ -11,7 +11,7 @@ A new Arabic/English platform for building websites through conversation. This r
 - A studio that persists briefs/notes and displays saved HTML/CSS versions, source files, JSON downloads, and sandboxed static previews.
 - Product status and milestone documentation.
 - Immutable source snapshots with ownership, concurrency checks and resource limits, now integrated with generation runs.
-- OpenAI adapter with bounded structured output, cancellation, request idempotency and persistent attempt limits. Live generation is disabled until configured and validated.
+- Free-only OpenRouter adapter with bounded, validated JSON output, cancellation, request idempotency and persistent attempt limits. Live generation is disabled until configured and validated.
 
 **Not implemented:** JavaScript/full-stack execution, isolated application build workers, public deployment, shared teams, credits, payments, email verification, and password recovery. The real AI provider has not yet been validated in this environment because no credential is configured. Do not use this development release for sensitive data or public production signups.
 
@@ -55,11 +55,15 @@ Setup writes the secret directly to the local file without printing it. On your 
 
 ## Static AI generation (disabled by default)
 
-Configure `NOVA_AI_API_KEY` securely in environment settings or a private `.env.local`; never commit a key or paste it into chat. Managed proxy credentials target `api.openai.com`. The server adapter uses OpenAI `gpt-4.1-mini`, a fixed HTTPS endpoint, normal TLS verification, and the inherited HTTPS proxy.
+Configure an **OpenRouter** key as `NOVA_AI_API_KEY` securely in environment settings or private `.env.local`; never commit it or paste it into chat. Proxy credentials must target `openrouter.ai`. `NOVA_AI_MODEL` defaults to `thinkingmachines/inkling:free`, a coding-capable model listed in the [official catalog](https://openrouter.ai/api/v1/models) with zero input/output pricing on 29 October 2026. It is a starting choice, not a verified “strongest model” ranking. Free quotas and availability may change.
 
-Run `npm run ai:smoke` after providing the credential and network access. This makes **one real, billable provider request**, validates the response and builds a sanitized static preview without executing source. Only after it passes, set `NOVA_AI_ENABLED=1` in the runtime configuration and restart the app. Missing credentials or the default flag keep the button disabled and return 503 without consuming attempts. The smoke command does not flip the flag automatically.
+Before every inference, the adapter requires an explicit `:free` model, reads its live catalog entry, and rejects missing, expired, nonzero-priced or unknown-priced entries. The request also enforces a zero prompt/completion price ceiling and disables provider fallback. There is no paid-model fallback or automatic retry. Both endpoints are fixed HTTPS OpenRouter endpoints; inherited proxy settings and normal TLS verification are preserved.
 
-Generation sends the saved project name, brief, and up to eight latest notes, bounded to 16,000 characters. Oldest note content is omitted first when needed. It regenerates HTML/CSS from that context; it does not edit arbitrary applications or incorporate unsaved text. Provider output is capped at 4,096 tokens and 60 seconds. Each attempt consumes one of 3 per account / 20 environment-wide in a rolling 24-hour window, including failures and cancellations. There is at most one active request per account and three globally. These are request/token limits, not a currency budget; configure provider spending limits separately.
+Run `npm run ai:smoke` after securely adding a key from [OpenRouter](https://openrouter.ai/keys). This makes **one real free-only request** and consumes free quota, validates its output, and builds a sanitized static preview without executing source. Only after success, set `NOVA_AI_ENABLED=1` and restart. The command does not enable generation automatically. Missing keys, disabled activation, or a non-free model keep the button disabled and return 503 without consuming a local attempt. **Live inference has not been validated in this environment because no key is configured.**
+
+Generation sends the saved name, brief, and up to eight latest notes to OpenRouter and the model provider, bounded to 16,000 characters. Oldest note content is omitted first. It regenerates HTML/CSS from that context; it does not incorporate current source or unsaved text. Output is capped at 12,000 tokens and the operation at 90 seconds. JSON is requested in the prompt and validated locally; provider-enforced structured output is not assumed. Invalid or truncated output saves no version.
+
+Each attempt consumes one of 3 per account / 20 environment-wide in a rolling 24-hour window, including failures and cancellations. There is at most one active request per account and three globally. Provider free quotas may be lower. These controls do not make hosting, storage or future deployment infrastructure free.
 
 A run captures its base source version before calling the model. Newer source edits win: stale output fails with a conflict and is never silently retried. Cancelled/deleted runs cannot publish a version; their concurrency reservation remains held until the worker acknowledges completion or its 120-second lease expires. Quota records survive project deletion. Schema initialization is explicit via `npm run db:migrate`.
 

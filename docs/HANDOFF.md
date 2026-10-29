@@ -2,60 +2,51 @@
 
 ## User direction
 
-Build a substantial full-stack AI application builder, incrementally. The user approved starting from scratch in this repository and pushing tested milestones to GitHub so other Codex sessions can continue.
+Build a substantial full-stack AI website builder from scratch in this repository. Preserve the premium dark/cyan reference-inspired interface, orb, compact navigation, Arabic/English and RTL. The user explicitly requests **free AI only** and frequent tested GitHub checkpoints. A “strongest model” claim requires real comparative evidence; no such benchmark has run.
 
-Latest design reference: dark rounded workspace, compact icon sidebar, cyan ambient glow, centered greeting and prompt composer, iridescent orb, and three suggestion cards. Preserve Nova branding and Arabic/English support.
+Fetch before pushing: more than one Codex session may change `main`. Preserve their commits; never force-push. Keep this file current so another session can resume without chat history.
 
-## Current checkpoint
+## Current integrated checkpoint — 29 October 2026
 
-The foundation is implemented: Better Auth signup/login/logout, owner-scoped SQLite projects, saved project notes, localized landing/dashboard/studio, and product roadmap. The later checkpoints below add source versions and a gated static generation pipeline. Billing, shared teams and public publication remain unimplemented.
+Base includes `2b1486a` and all preceding concurrent milestones. Accounts, owner-scoped projects/notes, private session drafts, dark workspace, immutable source snapshots, static-generation runs, preview/source/history/download UI and manual-source save/restore **service** are retained.
 
-Baseline verification: TypeScript, production build, 3 unit tests and 2 browser workflows passed in the previous implementation session. Browser workflows exercise signup, persisted briefs and notes, cross-user access rejection, signout/login, RTL, mobile overflow, and language persistence.
+Replaced the paid OpenAI adapter with **OpenRouter free-only inference**. `NOVA_AI_MODEL` defaults to `thinkingmachines/inkling:free`. The public catalog was checked today: zero prompt/completion prices and no listed expiration. Earlier candidate Laguna S 2.1 lists expiration on 31 October and is not the default. This is availability evidence, not live inference or a comparative quality benchmark.
 
-## Latest completed milestone — dark workspace
+Each request requires an explicit `:free` ID, a live catalog entry with all declared prices zero, zero token-price ceiling and disabled provider fallback. Missing/expired/unverifiable pricing blocks inference. Fixed HTTPS endpoints, normal TLS/proxy trust, bounded response streams and safe error codes protect secrets. JSON output is requested and validated locally; schema enforcement by the model is not assumed.
 
-Implemented the reference-inspired dark/cyan shell, responsive icon rail, CSS iridescent orb, central composer, working prompt suggestions, and consistent dashboard/studio/login palette. Arabic RTL mirrors the desktop rail; mobile uses compact top navigation.
+Current limits: 90-second operation, 12,000 output tokens, 16,000 prompt characters, 3 attempts/account and 20/environment per rolling 24 hours, 1 active/account and 3 globally. Attempts persist across project deletion; cancellation holds concurrency until acknowledged or a 120-second lease expires. Runs execute inside request lifetimes, not a durable background queue. No automatic retries.
 
-Private briefs now persist in tab-scoped session storage through sign-in, instead of query strings. Successful creation clears the matching draft. Repeated `next` query parameters no longer crash login.
+Generation regenerates exactly `index.html` + `styles.css` from saved brief and latest notes. It does **not yet include current source in model context**. Source commits capture the base and reject concurrent edits. The preview sanitizer and empty-sandbox iframe disable scripts, forms, external resources and parent access. Source downloads contain original untrusted code. This is a static HTML/CSS preview, not a full-stack application runner or public deployment.
 
-Validation: type check, 3 unit tests, production build, and all 3 browser workflows passed. The browser suite now runs against its own port 3100 server and fresh SQLite database. It additionally checks mobile studio/dashboard layouts, delete cancel/confirm, and repeated redirect parameters. Screenshots are in `docs/screenshots/`. GitHub Actions is configured; remote CI execution has not yet been observed.
+## Verified evidence
 
-## Concurrent session integration
+- `npm run typecheck`: passed.
+- `npm test`: 101 tests passed, including free-price guards and all retained source/store tests.
+- `npm run build`: passed.
+- `npm run test:e2e`: all 6 workflows passed against isolated production server/database. Includes ownership, cancellation, source download, mobile RTL/LTR and hostile iframe isolation.
+- `npm run setup:local` and repeated `db:migrate`: verified in this environment.
+- Provider/HTTP tests use fixtures. **No live inference has run; no AI credential is configured.**
 
-Merged the separate session's `595d088` workspace redesign into this branch. Its accessible, append-only suggestion composer, pending save state, scoped workspace theme, navigation, and keyboard/mobile/XSS checks are preserved. The public dark home, session draft privacy fixes, dedicated browser runner, and CI configuration are also retained. Styles are scoped to prevent cross-route leaks. The combined tree passed TypeScript, all 3 unit tests, the production build, and all 4 browser workflows. Always fetch before pushing: more than one session may be active.
+The static browser test invokes the actual sanitizer through Node's TS loader in a subprocess because Playwright's custom loader cannot link sanitize-html's CJS-to-ESM dependency. It retains all hostile-content assertions.
 
-## Latest backend checkpoint — source versions
+## Secure activation prerequisite
 
-Implemented the internal `sourceVersionStore` in `src/lib/versions.ts`, exported as `sourceVersions` from `db.ts`. Explicit schema setup runs in `npm run db:migrate`. It supports immutable snapshots, write/delete changes, restore-as-new-version, ownership checks, optimistic concurrency, transactional rollback, portable path validation, and bounded UTF-8/file/history sizes. Metadata listing does not load all file bodies.
+Add an OpenRouter key securely in environment settings as `NOVA_AI_API_KEY`, targeting `openrouter.ai`. The saved requirement is named `NOVA_OPENROUTER_KEY`; a saved draft does not establish runtime readiness. Never request or expose keys in chat/source/logs.
 
-Latest validation: 27 unit tests, 4 browser workflows, production build, and TypeScript passed. Source schema setup succeeded twice. Browser tests use fresh isolated databases and preserve both sessions' coverage. See `docs/SOURCE-VERSIONS.md` for the API and security boundaries.
-
-There are no public source mutation endpoints or source editor controls yet. This module does not invoke an AI provider, write files outside SQLite, execute code, create previews, or publish sites.
-
-## Latest integrated checkpoint — static generation
-
-Merged remote checkpoint `410b606` into the static-generation work; the canonical `sourceVersionStore` remains the single source of truth. Added explicit generation migrations, durable owner-scoped runs, idempotency, cancellation acknowledgements, crash recovery, rolling request limits, base-version capture and atomic source conflict rejection. Existing non-static source projects are rejected before a provider request.
-
-Added an OpenAI adapter (`gpt-4.1-mini`, fixed HTTPS endpoint) with proxy support, structured output, 60-second timeout and 4,096 output-token limit. Static previews sanitize HTML/CSS and use an empty-sandbox iframe with CSP and no network access. Browser-tested internal anchors use `about:srcdoc#...` to avoid navigating the frame to the parent application. Source view/download, version history and cancellation controls support Arabic and English. No generated code runs on the server.
-
-Validation: 72 unit tests and all 6 browser workflows passed; production build and TypeScript passed; database migration succeeded twice. Production dependency audit reported 0 known advisories. Browser tests use a unique database and fixture source artifacts, force the AI credential empty, and cover authorization, source/download, cancellation, mobile RTL/LTR and hostile preview isolation. Fixture-provider tests are not live AI validation. Fixture signup respects Better Auth’s returned retry window when localhost hits the real signup rate limit; protections remain enabled. Empty sanitized artifacts are rejected, and the newest notes are preserved when context is truncated.
-
-**External prerequisite:** no OpenAI API credential is configured or validated. `NOVA_AI_API_KEY` requirement is saved in the cloud environment draft for `api.openai.com`. Enter its value securely in environment settings. Run `npm run ai:smoke` (one billable real request), then set `NOVA_AI_ENABLED=1` only after success. Both the credential and flag are required; the default is disabled. Never put a key in chat or source control. See `docs/GENERATION.md` and README for limits and the static-only boundary.
+Run `npm run ai:smoke` (one free-only request consuming quota), then set `NOVA_AI_ENABLED=1` and restart only after it passes. `NOVA_AI_MODEL` may select another explicit free ID; availability and free quotas can change. Hosted infrastructure is not guaranteed free. Read `docs/GENERATION.md` and README.
 
 ## Next work
 
-1. Validate the real provider with the secure credential, then enable and test actual generation end to end.
-2. Implement a separately isolated worker for generated JavaScript/full-stack builds; current preview only renders sanitized static HTML/CSS in the browser.
-3. Add production hardening, email verification/recovery, operational/resource controls and provider spending budgets before public launch. Billing, teams and public deployment remain planned.
+1. Connect `staticSourceStore` save/restore to owner-checked HTTP routes and editor controls. The backend service and tests landed in `2b1486a`; those operations are not yet exposed in the UI. Include manual versions in history without dropping generation versions, retain stale-base conflicts and preview validation.
+2. Include the captured source snapshot in AI edit context, with explicit byte limits and preservation of existing work.
+3. Once the key is provided, validate actual inference and compare free models on Arabic/English site quality. Keep it disabled until validated.
+4. Add a separately isolated worker for generated JavaScript/full-stack builds, resource/network policies and verified readiness. Never execute generated code inside the Next.js process.
+5. Billing, shared teams, publication, email verification/recovery, backups, operational controls and production hardening remain planned.
 
-The user explicitly requests pushing each completed checkpoint to GitHub immediately. Fetch before pushing and preserve concurrent work. Do not force-push. The safety checkpoint is on `codex/static-generation`; integrate verified results into main without dropping other sessions' commits.
+## Starting another session
 
-## Start here
+Use the existing checkout; no worktree unless requested. Activate Node 22 at `/workspace/toolchains/node22/node_modules/node/bin`, then `npm ci` and `npm run setup:local`. Read `AGENTS.md`, plan and architecture. Browser tests start their own server on port 3100; build first. Never point them at production.
 
-1. Inspect `git status` and remote branch state. Coordinate with other sessions rather than force-pushing.
-2. Activate Node 22; run `npm ci` and `npm run setup:local`.
-3. Read README for running tests and browser executable configuration.
-4. Use a dedicated database for E2E checks. Tests create local accounts and projects.
-5. Read the plan for the next vertical slice: prompt → provider → source version → isolated build → verified preview.
+Local `data/nova.sqlite` had an empty development-only generation table from the preserved `codex/free-ai-checkpoint` branch. It was backed up under ignored `data/` and renamed to `generation_runs_checkpoint_archive` before applying the canonical migration. Account and project data were retained. Do not merge that branch's alternate schema/UI wholesale into main; relevant free-only safeguards are integrated here.
 
-No keys belong in chat, source control, browser bundles, or logs. The local development origin is not a published URL. Processes must restart after restoring the environment. There is no automatic work between sessions.
+The original free-generation work is preserved on GitHub at `codex/free-ai-checkpoint` (`1434a70`). Local secrets, databases, generated output and browser profiles remain ignored. Processes must restart after environment restoration. Localhost is not a published URL; work does not continue automatically between sessions.

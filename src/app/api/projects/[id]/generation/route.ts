@@ -1,3 +1,4 @@
+import { freeModelConfig } from "@/lib/free-model";
 import { generationConfigured } from "@/lib/generation-config";
 import { generations } from "@/lib/db";
 import { authorizeProject, json } from "@/lib/generation-http";
@@ -13,5 +14,6 @@ export async function GET(
     runs: generations.runs(auth.owner!, id),
     versions: generations.versions(auth.owner!, id),
     configured: generationConfigured(),
+    model: freeModelConfig().model,
   });
 }

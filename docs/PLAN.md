@@ -53,11 +53,20 @@ Work proceeds in explicit sessions. Record completed work, evidence, and next st
 
 - [x] Canonical source-version integration with captured base and conflict rejection.
 - [x] Durable attempts, cancellation acknowledgement, stale-run recovery, idempotency and rolling quotas.
-- [x] Bounded OpenAI adapter, proxy/TLS support and an explicit live smoke command.
+- [x] Bounded free-only OpenRouter adapter, proxy/TLS support and an explicit live smoke command.
 - [x] Sanitized static HTML/CSS preview with empty iframe sandbox, CSP and adversarial browser validation.
 - [x] Source/version UI, JSON download, owner-scoped endpoints and Arabic/English mobile tests.
 - [x] 72 unit tests, 6 browser workflows, production build, type check and repeatable migrations.
-- [ ] Supply a secure provider credential and complete real OpenAI validation before activation.
+- [ ] Supply a secure provider credential and complete real OpenRouter validation before activation.
 - [ ] Isolated full-stack build worker, actual deployment and production readiness.
 
 Generation remains disabled by default; simulated provider and fixture preview results are not evidence of live AI behavior.
+
+## Continuation after concurrent integration
+
+- [x] Preserve main through `2b1486a`, including validated manual-source save/restore service and tests.
+- [x] Replace paid inference with a configurable, free-only OpenRouter adapter and catalog/price guards.
+- [x] Keep full hostile-preview, ownership, cancellation and source-history coverage.
+- [ ] Connect the manual-source save/restore service to owner-scoped HTTP endpoints and editor UI.
+- [ ] Include the captured source snapshot in AI edit context; currently generation regenerates from brief/notes.
+- [ ] Benchmark free model quality on representative Arabic/English sites once the secure key is available.

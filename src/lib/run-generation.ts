@@ -33,7 +33,7 @@ export async function runGeneration(
   const signal = AbortSignal.any([
     input.signal,
     cancelled.signal,
-    AbortSignal.timeout(60000),
+    AbortSignal.timeout(90000),
   ]);
   const timer = setInterval(() => {
     if (generations.getRun(input.owner, runId)?.status !== "running")

@@ -1,6 +1,7 @@
 import nextEnv from "@next/env";
 nextEnv.loadEnvConfig(process.cwd());
-const { generateStaticSite, AI_MODEL } = await import("../src/lib/ai-provider");
+const { generateStaticSite } = await import("../src/lib/ai-provider");
+const { freeModelConfig } = await import("../src/lib/free-model");
 const { buildPreview } = await import("../src/lib/static-artifact");
 const apiKey = process.env.NOVA_AI_API_KEY;
 if (!apiKey) {
@@ -12,15 +13,15 @@ if (!apiKey) {
   try {
     const files = await generateStaticSite({
       apiKey,
-      signal: AbortSignal.timeout(60000),
+      signal: AbortSignal.timeout(90000),
       prompt:
         "Create a small static portfolio for a fictional design studio named Nova Test. Include a heading, three projects, and a contact section with no form or external links.",
     });
     const preview = buildPreview(files);
     console.log(
       JSON.stringify({
-        provider: "OpenAI",
-        model: AI_MODEL,
+        provider: "OpenRouter (free only)",
+        model: freeModelConfig().model,
         liveProvider: true,
         validatedFiles: files.map((f) => ({
           path: f.path,

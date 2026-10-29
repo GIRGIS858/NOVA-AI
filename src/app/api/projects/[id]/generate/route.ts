@@ -11,7 +11,7 @@ import { generateStaticSite } from "@/lib/ai-provider";
 import { runGeneration } from "@/lib/run-generation";
 import { GenerationStoreError } from "@/lib/generation-store";
 export const runtime = "nodejs";
-export const maxDuration = 90;
+export const maxDuration = 120;
 export async function POST(
   request: Request,
   context: { params: Promise<{ id: string }> },
