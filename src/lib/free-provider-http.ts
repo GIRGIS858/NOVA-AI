@@ -12,7 +12,7 @@ const defaultFetch: typeof fetch = async (url, init) => {
   >[1]) as unknown as Promise<Response>;
 };
 
-async function boundedJSON(
+export async function boundedJSON(
   response: Response,
   maxBytes: number,
 ): Promise<unknown> {

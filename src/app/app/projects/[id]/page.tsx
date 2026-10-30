@@ -1,4 +1,4 @@
-import { freeModelConfig } from "@/lib/free-model";
+import { inferenceConfig } from "@/lib/inference-config";
 import { generationConfigured } from "@/lib/generation-config";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -150,7 +150,8 @@ export default async function Studio({
               projectId={id}
               ar={ar}
               configured={generationConfigured()}
-              model={freeModelConfig().model}
+              model={inferenceConfig().model}
+              provider={inferenceConfig().provider}
               initialRuns={generations.runs(user.id, id)}
               initialVersions={sourceVersions
                 .list(user.id, id)

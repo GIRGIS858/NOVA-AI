@@ -36,14 +36,19 @@ type HistoryResponse = {
   versions: VersionMeta[];
   configured: boolean;
   model: string;
+  provider: string;
 };
 
 function errorText(code: string, ar: boolean) {
   switch (code) {
     case "not_configured":
       return ar
-        ? "التوليد غير مهيّأ بعد. أضف مفتاح OpenRouter في إعدادات البيئة واختبر الاتصال المجاني ثم فعّله."
-        : "Generation is not configured yet. Add an OpenRouter key in environment settings, validate the free connection, then enable it.";
+        ? "التوليد غير مهيّأ بعد. جهّز النموذج المحدد واختبره قبل تفعيل التوليد."
+        : "Generation is not configured yet. Prepare and validate the selected model before enabling generation.";
+    case "local_model_unavailable":
+      return ar
+        ? "النموذج المحلي غير متاح. شغّل Ollama وتأكد من تنزيل النموذج على جهاز الخادم."
+        : "Local model unavailable. Start Ollama and verify the model is downloaded on the application server.";
     case "free_model_required":
     case "free_model_unavailable":
       return ar
@@ -146,6 +151,7 @@ export function GenerationPanel({
   ar,
   configured,
   model,
+  provider,
   initialRuns,
   initialVersions,
 }: {
@@ -153,6 +159,7 @@ export function GenerationPanel({
   ar: boolean;
   configured: boolean;
   model: string;
+  provider: string;
   initialRuns: Run[];
   initialVersions: VersionMeta[];
 }) {
@@ -160,6 +167,7 @@ export function GenerationPanel({
   const [versions, setVersions] = useState(initialVersions);
   const [ready, setReady] = useState(configured);
   const [currentModel, setCurrentModel] = useState(model);
+  const [currentProvider, setCurrentProvider] = useState(provider);
   const [pending, setPending] = useState(false);
   const [cancelling, setCancelling] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
@@ -197,6 +205,7 @@ export function GenerationPanel({
         setVersions(result.versions);
         setReady(result.configured);
         setCurrentModel(result.model);
+        setCurrentProvider(result.provider);
         setSelected((current) =>
           preferLatest ||
           !result.versions.some((version) => version.id === current)
@@ -409,12 +418,19 @@ export function GenerationPanel({
         <Sparkles size={23} aria-hidden="true" />
       </div>
       <p className="generation-description">
-        {ar
-          ? "ابنِ أو طوّر الموقع باستخدام الوصف والملاحظات وأحدث ملفات HTML/CSS المحفوظة. تُرسل هذه البيانات إلى OpenRouter ومزوّد النموذج عند بدء التوليد. نسمح فقط بنموذج مجاني متحقق من سعره؛ لا تضع أسرارًا في الوصف أو الملاحظات أو الملفات."
-          : "Build or update the website using its brief, saved notes and latest saved HTML/CSS files. Starting generation sends this data to OpenRouter and the model provider. Only a verified zero-priced model is allowed; keep secrets out of briefs, notes and files."}
+        {currentProvider === "ollama"
+          ? ar
+            ? "ابنِ أو طوّر الموقع باستخدام الوصف والملاحظات والملفات المحفوظة. يعالجها نموذج Ollama على نفس جهاز خادم Nova، دون مفتاح اشتراك أو تحويل تلقائي إلى مزوّد خارجي. لا تضع أسرارًا في ملفات المشروع."
+            : "Build or update the website using saved requirements and source files. Ollama processes them on the Nova server’s own machine, without a subscription key or automatic remote fallback. Keep secrets out of project files."
+          : ar
+            ? "تُرسل بيانات المشروع وملفاته إلى OpenRouter ومزوّد النموذج المحدد عند التوليد. يُسمح فقط بنماذج متحقق من سعرها المجاني."
+            : "Generation sends saved requirements and source files to OpenRouter and the selected model provider. Only verified zero-priced models are allowed."}
       </p>
       <p className="generation-limits" dir="ltr">
-        OpenRouter · {currentModel}
+        {currentProvider === "ollama"
+          ? "Ollama · local"
+          : "OpenRouter · free only"}{" "}
+        · {currentModel || (ar ? "لم يُحدد نموذج" : "No model selected")}
       </p>
       <p className="generation-limits">
         {ar

@@ -1,9 +1,10 @@
-import { freeModelConfig } from "./free-model";
-/** Enable only after a real provider smoke check; keys stay exclusively server-side. */
+import { inferenceConfig } from "./inference-config";
+/** Configuration gate, not proof of model health. Enable after real smoke validation. */
 export function generationConfigured() {
+  const config = inferenceConfig();
   return (
     process.env.NOVA_AI_ENABLED === "1" &&
-    Boolean(process.env.NOVA_AI_API_KEY) &&
-    freeModelConfig().freeOnly
+    config.valid &&
+    (config.provider === "ollama" || Boolean(process.env.NOVA_AI_API_KEY))
   );
 }

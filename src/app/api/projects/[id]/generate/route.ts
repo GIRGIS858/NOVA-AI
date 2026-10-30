@@ -29,9 +29,8 @@ export async function POST(
   } catch {
     return json({ error: "invalid_request" }, 400);
   }
-  const apiKey = process.env.NOVA_AI_API_KEY;
-  if (!apiKey || !generationConfigured())
-    return json({ error: "not_configured" }, 503);
+  const apiKey = process.env.NOVA_AI_API_KEY || "";
+  if (!generationConfigured()) return json({ error: "not_configured" }, 503);
   try {
     const result = await runGeneration(
       {

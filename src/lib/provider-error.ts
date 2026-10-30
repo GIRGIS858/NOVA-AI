@@ -1,6 +1,7 @@
 export class ProviderError extends Error {
   constructor(
     public code:
+      | "local_model_unavailable"
       | "provider_error"
       | "invalid_output"
       | "timeout"

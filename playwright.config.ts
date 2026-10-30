@@ -49,6 +49,8 @@ export default defineConfig({
       BETTER_AUTH_URL: baseURL,
       NOVA_DATABASE_PATH: databasePath,
       NOVA_E2E_DATABASE_PATH: databasePath,
+      NOVA_AI_PROVIDER: "ollama",
+      NOVA_OLLAMA_MODEL: "",
       NOVA_AI_API_KEY: "",
       NOVA_AI_ENABLED: "0",
       NOVA_AI_MODEL: "thinkingmachines/inkling:free",

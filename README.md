@@ -12,9 +12,9 @@ A new Arabic/English platform for building websites through conversation. This r
 - Manual HTML/CSS editor with immutable saves, version restoration, and preserved on-page drafts when another session changes the source. No AI key is needed for manual editing.
 - Product status and milestone documentation.
 - Immutable source snapshots with ownership, concurrency checks and resource limits, now integrated with generation runs.
-- Free-only OpenRouter adapter with bounded, validated JSON output, cancellation, request idempotency and persistent attempt limits. Live generation is disabled until configured and validated.
+- Local Ollama inference without provider keys, with bounded structured output, cancellation and immutable source snapshots. The legacy free-only OpenRouter adapter is explicit opt-in only. Live generation stays disabled until validated.
 
-**Not implemented:** JavaScript/full-stack execution, isolated application build workers, public deployment, shared teams, credits, payments, email verification, and password recovery. The real AI provider has not yet been validated in this environment because no credential is configured. Do not use this development release for sensitive data or public production signups.
+**Not implemented:** JavaScript/full-stack execution, isolated application build workers, public deployment, shared teams, credits, payments, email verification, and password recovery. Real local inference has not been validated here because this cloud machine has no Ollama model or GPU. Do not use this development release for sensitive data or public production signups.
 
 ## Local setup
 
@@ -56,13 +56,13 @@ Setup writes the secret directly to the local file without printing it. On your 
 
 ## Static AI generation (disabled by default)
 
-Configure an **OpenRouter** key as `NOVA_AI_API_KEY` securely in environment settings or private `.env.local`; never commit it or paste it into chat. Proxy credentials must target `openrouter.ai`. `NOVA_AI_MODEL` defaults to `thinkingmachines/inkling:free`, a coding-capable model listed in the [official catalog](https://openrouter.ai/api/v1/models) with zero input/output pricing on 29 October 2026. It is a starting choice, not a verified “strongest model” ranking. Free quotas and availability may change.
+The default is **Ollama on the same machine as Nova**, with no provider API key. Follow [local AI setup](docs/LOCAL-AI.md). Configure `NOVA_OLLAMA_MODEL`, keep `NOVA_AI_ENABLED=0`, and run `npm run ai:smoke` against your downloaded model. Enable generation only after it succeeds. The adapter uses loopback only, rejects cloud-backed model metadata and never falls back to an external service. It requests a 16K context with up to 4,096 output tokens and a conservative 10,000-byte messages limit. Model weights and appropriate GPU hardware are required; free model weights do not make hardware or electricity free.
 
-Before every inference, the adapter requires an explicit `:free` model, reads its live catalog entry, and rejects missing, expired, nonzero-priced or unknown-priced entries. The request also enforces a zero prompt/completion price ceiling and disables provider fallback. There is no paid-model fallback or automatic retry. Both endpoints are fixed HTTPS OpenRouter endpoints; inherited proxy settings and normal TLS verification are preserved.
+The user's initial machine has 16 GB RAM and an RTX 5070. `qwen2.5-coder:7b` is a starting candidate to benchmark, not a measured quality winner. The cloud environment has tested fixture responses only, not actual model inference. See the [full-stack delivery roadmap](docs/PLATFORM-ROADMAP.md).
 
-Run `npm run ai:smoke` after securely adding a key from [OpenRouter](https://openrouter.ai/keys). This makes **one real free-only request** and consumes free quota, validates its output, and builds a sanitized static preview without executing source. Only after success, set `NOVA_AI_ENABLED=1` and restart. The command does not enable generation automatically. Missing keys, disabled activation, or a non-free model keep the button disabled and return 503 without consuming a local attempt. **Live inference has not been validated in this environment because no key is configured.**
+The legacy adapter requires explicit `NOVA_AI_PROVIDER=openrouter`, a secure `NOVA_AI_API_KEY` targeting `openrouter.ai`, and an explicit free `NOVA_AI_MODEL`. It verifies live zero pricing before every request, rejects unverifiable pricing, enforces a zero token-price ceiling and disables fallback. It is not required for local inference. Existing installations that used OpenRouter must now select it explicitly.
 
-Generation sends the saved name, brief and up to eight latest notes (bounded to 16,000 characters), together with the complete captured HTML/CSS source snapshot, to OpenRouter and the model provider. Oldest note content is omitted first without splitting Unicode pairs. Source files are never truncated: the complete JSON context is limited to 256 KiB of UTF-8 and oversized contexts stop before any provider call. A new project uses create mode; existing source uses edit mode with instructions to preserve unrequested content and design. Unsaved editor text is not included. Source is captured in the same transaction as the run’s base version, so another session cannot silently replace the source used by that run. Output is capped at 12,000 tokens and the operation at 90 seconds. JSON is requested in the prompt and validated locally; provider-enforced structured output is not assumed. Invalid or truncated output saves no version.
+Generation sends the saved name, brief and up to eight latest notes (bounded to 16,000 characters), together with the complete captured HTML/CSS source snapshot, to the explicitly selected runtime. Oldest note content is omitted first without splitting Unicode pairs. Source files are never truncated: the complete JSON context is limited to 256 KiB of UTF-8 and oversized contexts stop before any provider call. A new project uses create mode; existing source uses edit mode with instructions to preserve unrequested content and design. Unsaved editor text is not included. Source is captured in the same transaction as the run’s base version, so another session cannot silently replace the source used by that run. OpenRouter output is capped at 12,000 tokens (local Ollama: 4,096) and the operation at 90 seconds. JSON is requested in the prompt and validated locally; provider-enforced structured output is not assumed. Invalid or truncated output saves no version.
 
 Each attempt consumes one of 3 per account / 20 environment-wide in a rolling 24-hour window, including failures and cancellations. There is at most one active request per account and three globally. Provider free quotas may be lower. These controls do not make hosting, storage or future deployment infrastructure free.
 
@@ -108,7 +108,7 @@ GitHub Actions runs type checks, unit tests, a production build, and browser wor
 - Project descriptions must not contain API keys or infrastructure secrets.
 - Local development origin is not a published website. Cloud onboarding does not expose the app in a web preview.
 - No email recovery or verification provider is configured yet. Public launch must wait for these and an abuse/security review.
-- Saving a project or note makes no AI request. Explicit generation and the live smoke command incur provider charges when enabled.
+- Saving a project or note makes no AI request. Explicit local generation and smoke checks use your hardware; the optional remote adapter consumes provider free quota.
 
 See [the development plan](docs/PLAN.md) and [architecture decisions](docs/ARCHITECTURE.md).
 

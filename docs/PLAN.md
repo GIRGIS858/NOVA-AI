@@ -1,5 +1,7 @@
 # Delivery plan
 
+Current direction: local AI on the user’s 16 GB RAM / RTX 5070 machine, without external provider keys. The full-stack sequence and acceptance criteria are in [PLATFORM-ROADMAP.md](PLATFORM-ROADMAP.md); older provider-key prerequisites below describe the previous remote-only milestone.
+
 ## 01 — Foundation (current)
 
 - [x] Original responsive marketing page.
@@ -81,3 +83,11 @@ Source-aware context checkpoint: 113 unit tests, all 7 browser workflows, TypeSc
 - [x] Bounded comparison work and disclosed display limits for large files; original source/download stays complete.
 - [x] 125 unit tests, production build, type checks and all 7 browser workflows.
 - [ ] Focused changed-line navigation and downloadable comparisons for larger histories.
+
+## Local inference foundation — 30 October 2026
+
+- [x] Ollama provider selection by default, local model checks, no API key or remote fallback.
+- [x] Bounded schema output, whole-source/context rejection and shared artifact validation.
+- [x] Provider-aware Arabic/English disclosure and local activation instructions.
+- [ ] Real model smoke and bilingual benchmark on the user's computer.
+- [ ] Durable orchestration worker and persisted progress events before full-stack execution.

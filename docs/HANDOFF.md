@@ -1,5 +1,9 @@
 # Nova — continuation handoff
 
+## Current priority — local full-stack platform (30 October 2026)
+
+The latest user direction supersedes the old OpenRouter-key prerequisite: build a substantial full-stack application platform with AI running on the user's own machine, without external provider keys. Hardware supplied: 16 GB RAM and RTX 5070; OS/exact VRAM/disk remain unknown. Read LOCAL-AI.md and PLATFORM-ROADMAP.md. The default runtime is now Ollama; OpenRouter survives only as explicit opt-in, never fallback. No model is installed in this cloud environment and no real local inference is claimed.
+
 ## User direction
 
 Build a substantial full-stack AI website builder from scratch in this repository. Preserve the premium dark/cyan reference-inspired interface, orb, compact navigation, Arabic/English and RTL. The user explicitly requests **free AI only** and frequent tested GitHub checkpoints. A “strongest model” claim requires real comparative evidence; no such benchmark has run.
@@ -71,3 +75,13 @@ Continued from GitHub main `191d52b` in a fresh restored cloud environment. Adde
 The line diff preserves Unicode and line endings, uses bounded LCS work, and falls back to a disclosed replacement block for large changes. Rendering is capped at 2,000 diff lines per file with a visible notice directing users to complete Source/JSON; original source remains intact. Tests reconstruct both inputs, cover repeated lines, newline-only changes, Arabic/emoji, large replacements and 150,000 blank lines. Browser coverage checks additions/removals, unchanged CSS, comparison baseline selection, English mobile layout and the existing restoration/ownership workflows.
 
 Validation: Node 22.23.4, locked install and local migrations succeeded; type checking, 125 unit tests, production build and all 7 browser workflows passed. Live AI is still disabled and untested because no provider credential is configured. Existing saved environment install/start instructions remain applicable; no environment publication was performed by the agent.
+
+## Latest milestone — local inference foundation
+
+Added the Ollama adapter and made local inference the default. Configuration requires an explicit local model and enable flag, no API key. Calls target loopback port 11434 only, reject redirects and remote/cloud model metadata, bound input/response size, reject truncated outputs, and share the existing static artifact checks. Local requests never forward even a present remote credential. The studio now discloses the actual selected runtime. The live smoke command handles local models and does not activate them automatically.
+
+The user's machine can start benchmarking a 7B quantized coding model; qwen2.5-coder:7b is a candidate, not a verified best model. The current local budget is 16K context, 4,096 output tokens and 10,000 serialized message bytes. The 90-second deadline/120-second lease and existing attempt quotas are unchanged. Real inference and performance validation remain pending on the user's machine. Do not expose their Ollama port publicly or assume cloud localhost refers to their laptop.
+
+Next: complete the local hardware smoke/benchmark, then implement durable jobs with persisted progress, cancellation and lease recovery. Continue from PLATFORM-ROADMAP.md toward isolated full-stack builds, application data and deployment. The current generator still supports HTML/CSS only.
+
+Validation for this checkpoint: type checking, all 137 unit tests (including an ephemeral real-HTTP fixture runtime), production build and all 7 browser workflows passed. The actual `ai:smoke` command was attempted with local provider/model selection and failed because the cloud environment has no reachable local model runtime; no real generation success is claimed. Saved startup instructions were updated in the environment draft for local-first operation; they were not published. The existing install script remains applicable.

@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, afterEach, describe, expect, it, vi } from "vitest";
 import {
   freeProviderTransport,
   AI_ENDPOINT,
@@ -126,3 +126,5 @@ describe("free-only transport (mocked HTTP; never live inference)", () => {
     await expect(call(g)).rejects.toMatchObject({ code: "invalid_output" });
   });
 });
+
+beforeEach(() => vi.stubEnv("NOVA_AI_PROVIDER", "openrouter"));

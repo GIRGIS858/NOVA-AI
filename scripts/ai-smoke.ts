@@ -1,12 +1,13 @@
 import nextEnv from "@next/env";
 nextEnv.loadEnvConfig(process.cwd());
 const { generateStaticSite } = await import("../src/lib/ai-provider");
-const { freeModelConfig } = await import("../src/lib/free-model");
+const { inferenceConfig } = await import("../src/lib/inference-config");
+const config = inferenceConfig();
 const { buildPreview } = await import("../src/lib/static-artifact");
-const apiKey = process.env.NOVA_AI_API_KEY;
-if (!apiKey) {
+const apiKey = process.env.NOVA_AI_API_KEY || "";
+if (!config.valid || (config.provider === "openrouter" && !apiKey)) {
   console.error(
-    "NOVA_AI_API_KEY is missing. Configure it securely before running this live provider check.",
+    "Configure NOVA_OLLAMA_MODEL for local inference, or explicitly select and configure the optional OpenRouter provider.",
   );
   process.exitCode = 1;
 } else {
@@ -20,8 +21,8 @@ if (!apiKey) {
     const preview = buildPreview(files);
     console.log(
       JSON.stringify({
-        provider: "OpenRouter (free only)",
-        model: freeModelConfig().model,
+        provider: config.label,
+        model: config.model,
         liveProvider: true,
         validatedFiles: files.map((f) => ({
           path: f.path,
@@ -32,7 +33,7 @@ if (!apiKey) {
     );
   } catch {
     console.error(
-      "Live provider validation failed. No source was executed or published. Check the configured credential, network access and provider account.",
+      "Live provider validation failed. No source was executed or published. Check the selected model, its runtime and hardware. Local inference requires Ollama on the same machine.",
     );
     process.exitCode = 1;
   }

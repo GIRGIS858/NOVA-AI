@@ -1,4 +1,4 @@
-import { freeModelConfig } from "@/lib/free-model";
+import { inferenceConfig } from "@/lib/inference-config";
 import { generationConfigured } from "@/lib/generation-config";
 import { generations, sourceVersions } from "@/lib/db";
 import { sourceMetadata } from "@/lib/source-metadata";
@@ -15,6 +15,7 @@ export async function GET(
     runs: generations.runs(auth.owner!, id),
     versions: sourceVersions.list(auth.owner!, id).map(sourceMetadata),
     configured: generationConfigured(),
-    model: freeModelConfig().model,
+    model: inferenceConfig().model,
+    provider: inferenceConfig().provider,
   });
 }

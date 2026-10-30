@@ -38,8 +38,12 @@ The first provider adapter emits only HTML/CSS. Static artifact building validat
 
 ## Free inference boundary
 
-The only live adapter targets OpenRouter and permits explicit zero-priced `:free` models. Catalog pricing is checked before each inference, with fixed endpoints, redirects rejected, bounded response streams, inherited proxy/CA trust, a zero token-price ceiling and provider fallback disabled. `free-model.ts` owns the configurable ID; keys remain server-side. The public model catalog is not evidence of output quality or inference readiness. A secure key and real `ai:smoke` check remain external prerequisites. See `GENERATION.md`.
+The optional legacy remote adapter targets OpenRouter and permits explicit zero-priced `:free` models. Catalog pricing is checked before each inference, with fixed endpoints, redirects rejected, bounded response streams, inherited proxy/CA trust, a zero token-price ceiling and provider fallback disabled. `free-model.ts` owns the configurable ID; keys remain server-side. The public model catalog is not evidence of output quality or inference readiness. A secure key and real `ai:smoke` check remain external prerequisites. See `GENERATION.md`.
 
 ## Manual source editing
 
 Owner/origin-checked HTTP routes call `staticSourceStore` for validated saves and restore-as-new snapshots. All source history reads use the canonical version store, so generated, edited and restored versions remain visible together. The editor keeps its captured base and in-memory draft during conflicts; no silent rebase or automatic retry occurs. Drafts can be downloaded before reconciliation. Manual actions consume no AI quota.
+
+## Local-first direction — 30 October 2026
+
+The user's current requirement is locally hosted inference without external provider keys. Ollama is the default, restricted to loopback and downloaded model metadata with no external fallback. The initial supported topology runs Nova and Ollama on the same computer. See LOCAL-AI.md for activation and PLATFORM-ROADMAP.md for the full-stack target, durable worker, isolated execution, PostgreSQL, deployment and production acceptance criteria. These planned services are not implemented by the provider adapter.

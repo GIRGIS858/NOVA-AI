@@ -112,6 +112,12 @@ test("static versions, ownership, missing-provider gate, and cancellation", asyn
     expect(generations.runs(user.id, projectId)).toHaveLength(2);
 
     await page.goto(`/app/projects/${projectId}`);
+    await expect(
+      page.locator(".generation-limits").filter({ hasText: "Ollama · local" }),
+    ).toBeVisible();
+    await expect(page.locator(".generation-description")).toContainText(
+      "Ollama",
+    );
     await page.waitForLoadState("networkidle");
     const preview = page.locator("iframe.generation-preview");
     await expect(preview).toHaveAttribute("sandbox", "");

@@ -1,5 +1,9 @@
 import { freeProviderTransport } from "./free-provider-http";
-import { freeModelConfig } from "./free-model";
+import { inferenceConfig } from "./inference-config";
+import {
+  ollamaProviderTransport,
+  LOCAL_OUTPUT_TOKENS,
+} from "./ollama-provider-http";
 import { generationContext, type SourceContext } from "./generation-context";
 export { MAX_PROMPT_CHARS } from "./generation-context";
 import { ProviderError } from "./provider-error";
@@ -41,15 +45,27 @@ const responseSchema = z.object({
 
 export async function generateStaticSite(
   request: ProviderRequest,
-  transport: ProviderTransport = freeProviderTransport,
+  transport?: ProviderTransport,
 ): Promise<SourceFile[]> {
   const context = generationContext(request.prompt, request.source);
-  if (!request.apiKey) throw new ProviderError("not_configured");
-  const config = freeModelConfig();
-  if (!config.freeOnly) throw new ProviderError("free_model_required");
+  const config = inferenceConfig();
+  if (!config.valid)
+    throw new ProviderError(
+      config.provider === "openrouter"
+        ? "free_model_required"
+        : "not_configured",
+    );
+  if (config.provider === "openrouter" && !request.apiKey)
+    throw new ProviderError("not_configured");
+  const send =
+    transport ||
+    (config.provider === "ollama"
+      ? ollamaProviderTransport
+      : freeProviderTransport);
   const body = {
     model: config.model,
-    max_tokens: MAX_OUTPUT_TOKENS,
+    max_tokens:
+      config.provider === "ollama" ? LOCAL_OUTPUT_TOKENS : MAX_OUTPUT_TOKENS,
     stream: false,
     provider: {
       allow_fallbacks: false,
@@ -66,7 +82,11 @@ export async function generateStaticSite(
   };
   try {
     const parsed = responseSchema.parse(
-      await transport(body, request.apiKey, request.signal),
+      await send(
+        body,
+        config.provider === "ollama" ? "" : request.apiKey,
+        request.signal,
+      ),
     );
     if (parsed.choices[0].message.refusal)
       throw new ProviderError("invalid_output");

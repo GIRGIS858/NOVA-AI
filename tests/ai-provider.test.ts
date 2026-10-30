@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, afterEach, describe, expect, it, vi } from "vitest";
 import {
   generateStaticSite,
   MAX_OUTPUT_TOKENS,
@@ -54,16 +54,14 @@ describe("OpenRouter free adapter with mocked transport (no live API calls)", ()
         { path: "styles.css", content: "h1{color:teal}" },
       ],
     };
-    const transport = vi
-      .fn<ProviderTransport>()
-      .mockResolvedValue(
-        response(
-          JSON.stringify({
-            html: source.files[0].content,
-            css: source.files[1].content,
-          }),
-        ),
-      );
+    const transport = vi.fn<ProviderTransport>().mockResolvedValue(
+      response(
+        JSON.stringify({
+          html: source.files[0].content,
+          css: source.files[1].content,
+        }),
+      ),
+    );
     await generateStaticSite({ ...input(), source }, transport);
     const messages = transport.mock.calls[0][0].messages as Array<{
       role: string;
@@ -155,3 +153,6 @@ describe("OpenRouter free adapter with mocked transport (no live API calls)", ()
     }
   });
 });
+
+beforeEach(() => vi.stubEnv("NOVA_AI_PROVIDER", "openrouter"));
+afterEach(() => vi.unstubAllEnvs());
