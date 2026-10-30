@@ -126,6 +126,23 @@ test("manual source editing, immutable restoration, stale drafts and owner-only 
     expect(old.version.files).toEqual(files);
 
     await page
+      .getByRole("button", { name: "قارن الإصدارات", exact: true })
+      .click();
+    await expect(
+      page.getByLabel("تغييرات index.html", { exact: true }),
+    ).toContainText("First manual site");
+    await expect(page.locator(".diff-added")).toContainText(
+      "Second manual site",
+    );
+    await expect(page.locator(".diff-removed")).toContainText(
+      "First manual site",
+    );
+    await expect(
+      page.locator(".comparison-file").filter({ hasText: "styles.css" }),
+    ).toContainText("لا تغييرات");
+    await page.getByRole("button", { name: "المعاينة", exact: true }).click();
+
+    await page
       .getByRole("combobox", { name: "الإصدار المحفوظ", exact: true })
       .selectOption(first);
     await expect(previewHeading("First manual site")).toBeVisible();
@@ -241,6 +258,21 @@ test("manual source editing, immutable restoration, stale drafts and owner-only 
       .selectOption(newest);
     await expect(previewHeading("Another session saved this")).toBeVisible();
     await page.getByRole("button", { name: "English", exact: true }).click();
+    await page
+      .getByRole("button", { name: "Compare versions", exact: true })
+      .click();
+    await page
+      .getByRole("combobox", { name: "Compare from version", exact: true })
+      .selectOption(first);
+    await expect(
+      page.getByLabel("Changes in index.html", { exact: true }),
+    ).toContainText("Another session saved this");
+    expect(
+      await page.evaluate(
+        () => document.documentElement.scrollWidth <= window.innerWidth,
+      ),
+    ).toBe(true);
+    await page.getByRole("button", { name: "Preview", exact: true }).click();
     await page
       .getByRole("button", { name: "Edit latest version", exact: true })
       .click();

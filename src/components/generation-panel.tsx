@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { SourceComparison } from "./source-comparison";
 import { StaticSourceEditor } from "./static-source-editor";
 import {
   Code2,
@@ -168,7 +169,7 @@ export function GenerationPanel({
   const [versionData, setVersionData] = useState<VersionResponse | null>(null);
   const [loadingVersion, setLoadingVersion] = useState(false);
   const [versionRetry, setVersionRetry] = useState(0);
-  const [view, setView] = useState<"preview" | "source">("preview");
+  const [view, setView] = useState<"preview" | "source" | "compare">("preview");
   const [sourcePath, setSourcePath] = useState("index.html");
   const [editor, setEditor] = useState<{
     baseVersionId: string | null;
@@ -614,6 +615,14 @@ export function GenerationPanel({
             <button
               type="button"
               className="button ghost small"
+              aria-pressed={view === "compare"}
+              onClick={() => setView("compare")}
+            >
+              {ar ? "قارن الإصدارات" : "Compare versions"}
+            </button>
+            <button
+              type="button"
+              className="button ghost small"
               disabled={!versionData}
               onClick={download}
             >
@@ -659,6 +668,18 @@ export function GenerationPanel({
               />
             </>
           )}
+          {versionData &&
+            versionData.version.id === selected &&
+            view === "compare" && (
+              <SourceComparison
+                key={selected}
+                projectId={projectId}
+                selected={selected}
+                files={versionData.version.files}
+                versions={versions}
+                ar={ar}
+              />
+            )}
           {versionData && view === "source" && (
             <div className="generation-source">
               <div

@@ -77,3 +77,9 @@ Browser coverage exercises create → edit → restore, retained earlier content
 ## Next integration
 
 AI edit context now contains the complete snapshot captured with the run’s base version, bounded to 256 KiB after JSON encoding. Review real model edit quality once a key is supplied. Build a separately isolated runner for JavaScript/full-stack execution and verify readiness before exposing it. Never run generated application code inside Nova's web process.
+
+## Comparing saved versions
+
+Choose **Compare versions** in the studio, then select **Compare from version**. The destination is the currently selected saved version. Plus/minus markers show added and removed lines; unchanged files are labeled. The preceding version is selected by default when available. A single version shows guidance to save another version first. Comparison reads use the existing authenticated, owner-scoped version endpoint and do not save versions or consume AI attempts.
+
+Large changes may be displayed as replacement blocks. At most 2,000 diff lines per file are rendered, with an explicit notice when limited. Full originals remain available in Source and JSON downloads. Source text is escaped, including HTML/script tags. Whitespace and final-newline differences remain part of the comparison.

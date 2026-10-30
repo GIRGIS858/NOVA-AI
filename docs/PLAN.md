@@ -74,3 +74,10 @@ Generation remains disabled by default; simulated provider and fixture preview r
 Latest integrated verification: 101 unit tests, 7 browser workflows, TypeScript and production build passed after adding the manual source editor. Static generation still awaits a secure OpenRouter key and real inference validation.
 
 Source-aware context checkpoint: 113 unit tests, all 7 browser workflows, TypeScript and production build passed. Live inference remains blocked on the secure key.
+
+## Source comparison — 30 October 2026
+
+- [x] Arabic/English comparison of selected saved versions with baseline selection, added/removed lines and unchanged-file indicators.
+- [x] Bounded comparison work and disclosed display limits for large files; original source/download stays complete.
+- [x] 125 unit tests, production build, type checks and all 7 browser workflows.
+- [ ] Focused changed-line navigation and downloadable comparisons for larger histories.

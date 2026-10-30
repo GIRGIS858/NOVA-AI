@@ -37,7 +37,7 @@ Run `npm run ai:smoke` (one free-only request consuming quota), then set `NOVA_A
 
 ## Next work
 
-1. Add a readable comparison of source versions so users can review generated/manual changes before restoring or exporting.
+1. Source comparison is implemented (see the milestone below). Next, add a focused changed-lines view and a downloadable comparison for larger source histories.
 2. Once the key is provided, validate actual inference and compare free models on Arabic/English site quality. Keep it disabled until validated.
 3. Add a separately isolated worker for generated JavaScript/full-stack builds, resource/network policies and verified readiness. Never execute generated code inside the Next.js process.
 4. Billing, shared teams, publication, email verification/recovery, backups, operational controls and production hardening remain planned.
@@ -63,3 +63,11 @@ New browser coverage exercises create/edit/restore, retained original snapshots,
 Generation reservations now capture exact base-version files inside the transaction; subsequent source edits cannot silently change the data sent to AI. `generation-context.ts` validates static file shape, creates a JSON envelope, preserves full Unicode source and rejects oversized encoded payloads before a provider call. The system instruction distinguishes initial creation from edits and requests preservation of unrequested content/design. Actual model quality still awaits a credential and live validation; prior snapshots remain immutable. The UI explicitly discloses transmission of saved source alongside brief/notes.
 
 Tests cover manual/restored input, concurrent edits between reservation and provider start, owner isolation, JSON escaping/UTF-8 limits, complete-file preservation and absence of server credentials in model messages. Checkpoint validation: TypeScript, all 113 unit tests, production build and all 7 browser workflows passed. No live provider inference was performed.
+
+## Latest milestone — source comparison (30 October 2026)
+
+Continued from GitHub main `191d52b` in a fresh restored cloud environment. Added an Arabic/English Compare versions view to the studio. Users choose a baseline and compare it to the selected saved version before restoring or downloading. The default baseline is the preceding version (or another saved version when viewing the oldest). Added/removed lines have explicit markers; unchanged files are identified. Loading failures can be retried, and obsolete requests are aborted when selection changes. Existing owner-scoped version endpoints remain the only data source. Source is rendered as escaped React text, never executed.
+
+The line diff preserves Unicode and line endings, uses bounded LCS work, and falls back to a disclosed replacement block for large changes. Rendering is capped at 2,000 diff lines per file with a visible notice directing users to complete Source/JSON; original source remains intact. Tests reconstruct both inputs, cover repeated lines, newline-only changes, Arabic/emoji, large replacements and 150,000 blank lines. Browser coverage checks additions/removals, unchanged CSS, comparison baseline selection, English mobile layout and the existing restoration/ownership workflows.
+
+Validation: Node 22.23.4, locked install and local migrations succeeded; type checking, 125 unit tests, production build and all 7 browser workflows passed. Live AI is still disabled and untested because no provider credential is configured. Existing saved environment install/start instructions remain applicable; no environment publication was performed by the agent.

@@ -268,3 +268,32 @@
   outline: 2px solid #8fdbcf;
   outline-offset: -2px;
 }
+
+.source-comparison {
+  min-width: 0;
+}
+.comparison-file {
+  margin-top: 12px;
+}
+.comparison-file h4,
+.comparison-file p {
+  padding: 10px 14px;
+  color: #cfe7df;
+  font-size: 12px;
+}
+.diff-line {
+  display: block;
+  min-width: fit-content;
+}
+.diff-added {
+  background: #17382d;
+  color: #baf2ce;
+}
+.diff-removed {
+  background: #402329;
+  color: #ffd0d3;
+}
+.diff-eol {
+  color: #a9b9bc;
+  font-size: 10px;
+}
