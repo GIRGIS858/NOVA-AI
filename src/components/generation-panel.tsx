@@ -162,6 +162,7 @@ export function GenerationPanel({
   provider,
   initialRuns,
   initialVersions,
+  runsOnly = false,
 }: {
   projectId: string;
   ar: boolean;
@@ -170,6 +171,7 @@ export function GenerationPanel({
   provider: string;
   initialRuns: Run[];
   initialVersions: VersionMeta[];
+  runsOnly?: boolean;
 }) {
   const [runs, setRuns] = useState(initialRuns);
   const [versions, setVersions] = useState(initialVersions);
@@ -246,8 +248,10 @@ export function GenerationPanel({
   }, [pending, active, refreshHistory]);
 
   useEffect(() => {
-    if (!selected) {
+    if (runsOnly || !selected) {
       setVersionData(null);
+      setVersionError("");
+      setLoadingVersion(false);
       return;
     }
     const controller = new AbortController();
@@ -272,10 +276,17 @@ export function GenerationPanel({
         if (!controller.signal.aborted) setLoadingVersion(false);
       });
     return () => controller.abort();
-  }, [base, selected, versionRetry]);
+  }, [base, selected, versionRetry, runsOnly]);
 
   async function generate() {
-    if (requestInFlight.current || active || !ready || editor || restoring)
+    if (
+      runsOnly ||
+      requestInFlight.current ||
+      active ||
+      !ready ||
+      editor ||
+      restoring
+    )
       return;
     requestInFlight.current = true;
     setPending(true);
@@ -357,6 +368,7 @@ export function GenerationPanel({
     const latest = versions[0]?.id;
     if (
       restoreInFlight.current ||
+      runsOnly ||
       !latest ||
       !selected ||
       latest === selected ||
@@ -392,7 +404,7 @@ export function GenerationPanel({
   }
 
   function download() {
-    if (!versionData) return;
+    if (runsOnly || !versionData) return;
     const blob = new Blob(
       [
         JSON.stringify(
@@ -437,60 +449,76 @@ export function GenerationPanel({
     <section className="generation-panel" aria-labelledby="generation-title">
       <div className="generation-heading">
         <div>
-          <p className="overline">HTML + CSS</p>
+          {!runsOnly && <p className="overline">HTML + CSS</p>}
           <h3 id="generation-title">
-            {ar ? "من الفكرة إلى أول نسخة" : "From a brief to a first version"}
+            {runsOnly
+              ? ar
+                ? "مهام التوليد"
+                : "Generation tasks"
+              : ar
+                ? "من الفكرة إلى أول نسخة"
+                : "From a brief to a first version"}
           </h3>
         </div>
         <Sparkles size={23} aria-hidden="true" />
       </div>
-      <p className="generation-description">
-        {currentProvider === "ollama"
-          ? ar
-            ? "ابنِ أو طوّر الموقع باستخدام الوصف والملاحظات والملفات المحفوظة. يعالجها نموذج Ollama على نفس جهاز خادم Nova، دون مفتاح اشتراك أو تحويل تلقائي إلى مزوّد خارجي. لا تضع أسرارًا في ملفات المشروع."
-            : "Build or update the website using saved requirements and source files. Ollama processes them on the Nova server’s own machine, without a subscription key or automatic remote fallback. Keep secrets out of project files."
-          : ar
-            ? "تُرسل بيانات المشروع وملفاته إلى OpenRouter ومزوّد النموذج المحدد عند التوليد. يُسمح فقط بنماذج متحقق من سعرها المجاني."
-            : "Generation sends saved requirements and source files to OpenRouter and the selected model provider. Only verified zero-priced models are allowed."}
-      </p>
-      <p className="generation-limits" dir="ltr">
-        {currentProvider === "ollama"
-          ? "Ollama · local"
-          : "OpenRouter · free only"}{" "}
-        · {currentModel || (ar ? "لم يُحدد نموذج" : "No model selected")}
-      </p>
-      <p className="generation-limits">
-        {ar
-          ? "٣ محاولات لكل حساب، و٢٠ للبيئة، خلال أي فترة من ٢٤ ساعة. تدعم هذه المرحلة HTML وCSS فقط؛ دون JavaScript أو نشر عام."
-          : "3 attempts per account and 20 across the environment in any 24-hour window. This milestone supports HTML and CSS, without JavaScript or public publishing."}
-      </p>
-      {!ready && (
-        <p className="generation-unavailable" role="status">
-          {errorText("not_configured", ar)}
-        </p>
+      {!runsOnly && (
+        <>
+          <p className="generation-description">
+            {currentProvider === "ollama"
+              ? ar
+                ? "ابنِ أو طوّر الموقع باستخدام الوصف والملاحظات والملفات المحفوظة. يعالجها نموذج Ollama على نفس جهاز خادم Nova، دون مفتاح اشتراك أو تحويل تلقائي إلى مزوّد خارجي. لا تضع أسرارًا في ملفات المشروع."
+                : "Build or update the website using saved requirements and source files. Ollama processes them on the Nova server’s own machine, without a subscription key or automatic remote fallback. Keep secrets out of project files."
+              : ar
+                ? "تُرسل بيانات المشروع وملفاته إلى OpenRouter ومزوّد النموذج المحدد عند التوليد. يُسمح فقط بنماذج متحقق من سعرها المجاني."
+                : "Generation sends saved requirements and source files to OpenRouter and the selected model provider. Only verified zero-priced models are allowed."}
+          </p>
+          <p className="generation-limits" dir="ltr">
+            {currentProvider === "ollama"
+              ? "Ollama · local"
+              : "OpenRouter · free only"}{" "}
+            · {currentModel || (ar ? "لم يُحدد نموذج" : "No model selected")}
+          </p>
+          <p className="generation-limits">
+            {ar
+              ? "٣ محاولات لكل حساب، و٢٠ للبيئة، خلال أي فترة من ٢٤ ساعة. تدعم هذه المرحلة HTML وCSS فقط؛ دون JavaScript أو نشر عام."
+              : "3 attempts per account and 20 across the environment in any 24-hour window. This milestone supports HTML and CSS, without JavaScript or public publishing."}
+          </p>
+          {!ready && (
+            <p className="generation-unavailable" role="status">
+              {errorText("not_configured", ar)}
+            </p>
+          )}
+        </>
       )}
       <div className="generation-actions">
-        <button
-          className="button primary small"
-          type="button"
-          onClick={() => void generate()}
-          disabled={
-            !ready || pending || Boolean(active) || Boolean(editor) || restoring
-          }
-        >
-          {pending || active ? (
-            <LoaderCircle size={15} className="spin" aria-hidden="true" />
-          ) : (
-            <Sparkles size={15} aria-hidden="true" />
-          )}
-          {pending || active
-            ? ar
-              ? "جارٍ التوليد…"
-              : "Generating…"
-            : ar
-              ? "ولّد نسخة جديدة"
-              : "Generate a new version"}
-        </button>
+        {!runsOnly && (
+          <button
+            className="button primary small"
+            type="button"
+            onClick={() => void generate()}
+            disabled={
+              !ready ||
+              pending ||
+              Boolean(active) ||
+              Boolean(editor) ||
+              restoring
+            }
+          >
+            {pending || active ? (
+              <LoaderCircle size={15} className="spin" aria-hidden="true" />
+            ) : (
+              <Sparkles size={15} aria-hidden="true" />
+            )}
+            {pending || active
+              ? ar
+                ? "جارٍ التوليد…"
+                : "Generating…"
+              : ar
+                ? "ولّد نسخة جديدة"
+                : "Generate a new version"}
+          </button>
+        )}
         {active && (
           <button
             className="button ghost small"
@@ -542,233 +570,239 @@ export function GenerationPanel({
         </p>
       )}
 
-      <div className="generation-actions">
-        <button
-          className="button ghost small"
-          type="button"
-          disabled={
-            Boolean(editor) ||
-            pending ||
-            Boolean(active) ||
-            restoring ||
-            (versions.length > 0 &&
-              (!versionData ||
-                versionData.version.id !== selected ||
-                selected !== versions[0].id))
-          }
-          onClick={() => {
-            setSourceNotice("");
-            setEditor({
-              baseVersionId: versions[0]?.id || null,
-              files: versionData?.version.files || [
-                { path: "index.html", content: "" },
-                { path: "styles.css", content: "" },
-              ],
-            });
-          }}
-        >
-          <Code2 size={15} aria-hidden="true" />
-          {versions.length
-            ? ar
-              ? "عدّل النسخة الأحدث"
-              : "Edit latest version"
-            : ar
-              ? "أضف ملفات يدويًا"
-              : "Add files manually"}
-        </button>
-        {versions.length > 0 && selected !== versions[0].id && (
-          <button
-            className="button ghost small"
-            type="button"
-            disabled={
-              Boolean(editor) ||
-              restoring ||
-              pending ||
-              Boolean(active) ||
-              !versionData
-            }
-            onClick={() => void restoreVersion()}
-          >
-            {restoring
-              ? ar
-                ? "جارٍ الاستعادة…"
-                : "Restoring…"
-              : ar
-                ? "استعد كإصدار جديد"
-                : "Restore as a new version"}
-          </button>
-        )}
-      </div>
-      {sourceNotice && (
-        <p role="status" className="generation-preview-note">
-          {sourceNotice}
-        </p>
-      )}
-      {editor && (
-        <StaticSourceEditor
-          projectId={projectId}
-          ar={ar}
-          baseVersionId={editor.baseVersionId}
-          initialFiles={editor.files}
-          onSaved={sourceSaved}
-          onClose={() => setEditor(null)}
-          errorMessage={(code) => errorText(code, ar)}
-        />
-      )}
-      {versions.length > 0 && (
-        <div className="generation-version">
-          <label htmlFor="source-version">
-            {ar ? "الإصدار المحفوظ" : "Saved version"}
-            <select
-              id="source-version"
-              value={selected}
-              disabled={Boolean(editor) || restoring}
-              onChange={(event) => setSelected(event.target.value)}
-            >
-              {versions.map((version) => (
-                <option key={version.id} value={version.id}>
-                  {ar ? "نسخة" : "Version"} {version.number} ·{" "}
-                  {date(version.created_at)}
-                  {version.restored_from
-                    ? ar
-                      ? " · مستعاد"
-                      : " · restored"
-                    : ""}
-                </option>
-              ))}
-            </select>
-          </label>
-          <div
-            className="generation-view-actions"
-            aria-label={ar ? "طريقة عرض الإصدار" : "Version view"}
-          >
+      {!runsOnly && (
+        <>
+          <div className="generation-actions">
             <button
-              type="button"
-              aria-pressed={view === "preview"}
               className="button ghost small"
-              onClick={() => setView("preview")}
-            >
-              <Eye size={15} aria-hidden="true" />
-              {ar ? "المعاينة" : "Preview"}
-            </button>
-            <button
               type="button"
-              aria-pressed={view === "source"}
-              className="button ghost small"
-              onClick={() => setView("source")}
+              disabled={
+                Boolean(editor) ||
+                pending ||
+                Boolean(active) ||
+                restoring ||
+                (versions.length > 0 &&
+                  (!versionData ||
+                    versionData.version.id !== selected ||
+                    selected !== versions[0].id))
+              }
+              onClick={() => {
+                setSourceNotice("");
+                setEditor({
+                  baseVersionId: versions[0]?.id || null,
+                  files: versionData?.version.files.length
+                    ? versionData.version.files
+                    : [
+                        { path: "index.html", content: "" },
+                        { path: "styles.css", content: "" },
+                      ],
+                });
+              }}
             >
               <Code2 size={15} aria-hidden="true" />
-              {ar ? "الملفات" : "Source"}
+              {versions.length
+                ? ar
+                  ? "عدّل النسخة الأحدث"
+                  : "Edit latest version"
+                : ar
+                  ? "أضف ملفات يدويًا"
+                  : "Add files manually"}
             </button>
-            <button
-              type="button"
-              className="button ghost small"
-              aria-pressed={view === "compare"}
-              onClick={() => setView("compare")}
-            >
-              {ar ? "قارن الإصدارات" : "Compare versions"}
-            </button>
-            <button
-              type="button"
-              className="button ghost small"
-              disabled={!versionData}
-              onClick={download}
-            >
-              <Download size={15} aria-hidden="true" />
-              {ar ? "تنزيل JSON" : "Download JSON"}
-            </button>
+            {versions.length > 0 && selected !== versions[0].id && (
+              <button
+                className="button ghost small"
+                type="button"
+                disabled={
+                  Boolean(editor) ||
+                  restoring ||
+                  pending ||
+                  Boolean(active) ||
+                  !versionData
+                }
+                onClick={() => void restoreVersion()}
+              >
+                {restoring
+                  ? ar
+                    ? "جارٍ الاستعادة…"
+                    : "Restoring…"
+                  : ar
+                    ? "استعد كإصدار جديد"
+                    : "Restore as a new version"}
+              </button>
+            )}
           </div>
-          {loadingVersion && (
-            <p role="status" className="muted">
-              {ar ? "جارٍ تحميل الإصدار…" : "Loading version…"}
+          {sourceNotice && (
+            <p role="status" className="generation-preview-note">
+              {sourceNotice}
             </p>
           )}
-          {versionError && (
-            <div className="generation-load-error">
-              <p role="alert" className="form-error">
-                {errorText(versionError, ar)}
-              </p>
-              <button
-                type="button"
-                className="button ghost small"
-                onClick={() => setVersionRetry((value) => value + 1)}
-              >
-                {ar ? "أعد تحميل الإصدار" : "Reload version"}
-              </button>
-            </div>
+          {editor && (
+            <StaticSourceEditor
+              projectId={projectId}
+              ar={ar}
+              baseVersionId={editor.baseVersionId}
+              initialFiles={editor.files}
+              onSaved={sourceSaved}
+              onClose={() => setEditor(null)}
+              errorMessage={(code) => errorText(code, ar)}
+            />
           )}
-          {versionData && view === "preview" && (
-            <>
-              <p className="generation-preview-note">
-                {ar
-                  ? "معاينة معزولة: السكربتات والاتصالات الخارجية معطّلة. ليست رابطًا منشورًا."
-                  : "Isolated preview: scripts and external requests are disabled. This is not a published URL."}
-              </p>
-              <iframe
-                key={versionData.version.id}
-                title={
-                  ar ? "معاينة الموقع المعزولة" : "Isolated website preview"
-                }
-                sandbox=""
-                srcDoc={versionData.preview}
-                referrerPolicy="no-referrer"
-                className="generation-preview"
-              />
-            </>
-          )}
-          {versionData &&
-            versionData.version.id === selected &&
-            view === "compare" && (
-              <SourceComparison
-                key={selected}
-                projectId={projectId}
-                selected={selected}
-                files={versionData.version.files}
-                versions={versions}
-                ar={ar}
-              />
-            )}
-          {versionData && view === "source" && (
-            <div className="generation-source">
+          {versions.length > 0 && (
+            <div className="generation-version">
+              <label htmlFor="source-version">
+                {ar ? "الإصدار المحفوظ" : "Saved version"}
+                <select
+                  id="source-version"
+                  value={selected}
+                  disabled={Boolean(editor) || restoring}
+                  onChange={(event) => setSelected(event.target.value)}
+                >
+                  {versions.map((version) => (
+                    <option key={version.id} value={version.id}>
+                      {ar ? "نسخة" : "Version"} {version.number} ·{" "}
+                      {date(version.created_at)}
+                      {version.restored_from
+                        ? ar
+                          ? " · مستعاد"
+                          : " · restored"
+                        : ""}
+                    </option>
+                  ))}
+                </select>
+              </label>
               <div
-                className="generation-file-tabs"
-                aria-label={ar ? "ملفات الإصدار" : "Version files"}
+                className="generation-view-actions"
+                aria-label={ar ? "طريقة عرض الإصدار" : "Version view"}
               >
-                {versionData.version.files.map((file) => (
-                  <button
-                    key={file.path}
-                    type="button"
-                    aria-pressed={sourcePath === file.path}
-                    onClick={() => setSourcePath(file.path)}
-                  >
-                    {file.path}
-                  </button>
-                ))}
+                <button
+                  type="button"
+                  aria-pressed={view === "preview"}
+                  className="button ghost small"
+                  onClick={() => setView("preview")}
+                >
+                  <Eye size={15} aria-hidden="true" />
+                  {ar ? "المعاينة" : "Preview"}
+                </button>
+                <button
+                  type="button"
+                  aria-pressed={view === "source"}
+                  className="button ghost small"
+                  onClick={() => setView("source")}
+                >
+                  <Code2 size={15} aria-hidden="true" />
+                  {ar ? "الملفات" : "Source"}
+                </button>
+                <button
+                  type="button"
+                  className="button ghost small"
+                  aria-pressed={view === "compare"}
+                  onClick={() => setView("compare")}
+                >
+                  {ar ? "قارن الإصدارات" : "Compare versions"}
+                </button>
+                <button
+                  type="button"
+                  className="button ghost small"
+                  disabled={!versionData}
+                  onClick={download}
+                >
+                  <Download size={15} aria-hidden="true" />
+                  {ar ? "تنزيل JSON" : "Download JSON"}
+                </button>
               </div>
-              <pre
-                dir="ltr"
-                tabIndex={0}
-                aria-label={ar ? "محتوى الملف" : "File contents"}
-              >
-                <code>
-                  {versionData.version.files.find(
-                    (file) => file.path === sourcePath,
-                  )?.content || ""}
-                </code>
-              </pre>
+              {loadingVersion && (
+                <p role="status" className="muted">
+                  {ar ? "جارٍ تحميل الإصدار…" : "Loading version…"}
+                </p>
+              )}
+              {versionError && (
+                <div className="generation-load-error">
+                  <p role="alert" className="form-error">
+                    {errorText(versionError, ar)}
+                  </p>
+                  <button
+                    type="button"
+                    className="button ghost small"
+                    onClick={() => setVersionRetry((value) => value + 1)}
+                  >
+                    {ar ? "أعد تحميل الإصدار" : "Reload version"}
+                  </button>
+                </div>
+              )}
+              {versionData && view === "preview" && (
+                <>
+                  <p className="generation-preview-note">
+                    {ar
+                      ? "معاينة معزولة: السكربتات والاتصالات الخارجية معطّلة. ليست رابطًا منشورًا."
+                      : "Isolated preview: scripts and external requests are disabled. This is not a published URL."}
+                  </p>
+                  <iframe
+                    key={versionData.version.id}
+                    title={
+                      ar ? "معاينة الموقع المعزولة" : "Isolated website preview"
+                    }
+                    sandbox=""
+                    srcDoc={versionData.preview}
+                    referrerPolicy="no-referrer"
+                    className="generation-preview"
+                  />
+                </>
+              )}
+              {versionData &&
+                versionData.version.id === selected &&
+                view === "compare" && (
+                  <SourceComparison
+                    key={selected}
+                    projectId={projectId}
+                    selected={selected}
+                    files={versionData.version.files}
+                    versions={versions}
+                    ar={ar}
+                  />
+                )}
+              {versionData && view === "source" && (
+                <div className="generation-source">
+                  <div
+                    className="generation-file-tabs"
+                    aria-label={ar ? "ملفات الإصدار" : "Version files"}
+                  >
+                    {versionData.version.files.map((file) => (
+                      <button
+                        key={file.path}
+                        type="button"
+                        aria-pressed={sourcePath === file.path}
+                        onClick={() => setSourcePath(file.path)}
+                      >
+                        {file.path}
+                      </button>
+                    ))}
+                  </div>
+                  <pre
+                    dir="ltr"
+                    tabIndex={0}
+                    aria-label={ar ? "محتوى الملف" : "File contents"}
+                  >
+                    <code>
+                      {versionData.version.files.find(
+                        (file) => file.path === sourcePath,
+                      )?.content || ""}
+                    </code>
+                  </pre>
+                </div>
+              )}
             </div>
           )}
-        </div>
-      )}
-      {!versions.length && (
-        <div className="generation-empty">
-          <Code2 size={22} aria-hidden="true" />
-          <p>
-            {ar
-              ? "لم تُحفظ ملفات موقع لهذا المشروع بعد."
-              : "No website files have been saved for this project yet."}
-          </p>
-        </div>
+          {!versions.length && (
+            <div className="generation-empty">
+              <Code2 size={22} aria-hidden="true" />
+              <p>
+                {ar
+                  ? "لم تُحفظ ملفات موقع لهذا المشروع بعد."
+                  : "No website files have been saved for this project yet."}
+              </p>
+            </div>
+          )}
+        </>
       )}
       {runs.length > 0 && (
         <details className="generation-history">

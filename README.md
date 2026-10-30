@@ -1,6 +1,6 @@
 # Nova
 
-A new Arabic/English platform for building websites through conversation. This repository currently contains the **static generation development release**, not the finished AI builder.
+A new Arabic/English platform for building websites through conversation. This repository currently contains a **development release with static AI generation and a multi-file source workspace**, not the finished AI builder.
 
 ## Available now
 
@@ -10,6 +10,7 @@ A new Arabic/English platform for building websites through conversation. This r
 - Owner-scoped project creation, listing, notes, and deletion with confirmation.
 - A studio that persists briefs/notes and displays saved HTML/CSS versions, source files, JSON downloads, and sandboxed static previews.
 - Manual HTML/CSS editor with immutable saves, version restoration, and preserved on-page drafts when another session changes the source. No AI key is needed for manual editing.
+- Multi-file source workspace with nested files, create/rename/delete, captured-base saves, history restoration, draft JSON and complete saved ZIP downloads. Includes a reviewed React/Node starter with a dependency lockfile; see [project workspace](docs/PROJECT-WORKSPACE.md).
 - Product status and milestone documentation.
 - Immutable source snapshots with ownership, concurrency checks and resource limits, now integrated with generation runs.
 - Durable generation queue with a separate worker, saved stages, cancellation and bounded crash recovery.
@@ -92,6 +93,8 @@ Run `npm run db:migrate` explicitly before starting a fresh installation. Better
 SQLite is appropriate for this single-instance foundation. Multi-instance hosting requires a reviewed PostgreSQL migration, shared rate limits, backup/restore validation, and operational hardening. Do not merely point this SQLite adapter at PostgreSQL.
 
 ## Validation
+
+The ZIP integrity unit tests also require `python3`, using its standard-library ZIP reader independently of the exporter. Python is not required to run Nova or the exported starter.
 
 ```sh
 npm run typecheck

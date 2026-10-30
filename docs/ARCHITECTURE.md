@@ -51,3 +51,9 @@ The user's current requirement is locally hosted inference without external prov
 ## Durable generation — 30 October 2026
 
 Accepted generation now commits a queued job with its exact requirements/source and provider/model selection in one transaction. A separate Node worker claims under SQLite immediate locking, records phases, validates provider output and commits only against the captured source version. Claim tokens and fixed deadlines reject stale results. Queue payloads stay private and are cleared on terminal reconciliation. Jobs do not depend on browser connections; ambiguous interrupted inference is failed rather than automatically retried. See GENERATION-WORKER.md. This local orchestration worker does not execute generated code or supply the still-planned full-stack isolation boundary.
+
+## Multi-file source workspace — 30 October 2026
+
+The generic workspace uses the same canonical source history, ownership and limits as static generation. Full snapshot replacement is an additive source-store operation under the same immediate transaction and expected-base check; it supports replacing all 200 files and case-only renames without a partial delete/write sequence. Shared validation now rejects file/directory prefix collisions. History metadata excludes source payloads.
+
+Owner/origin-checked routes provide save, restore and one-time starter initialization. ZIP export requires an explicit saved version and returns bounded in-memory regular-file entries; it never extracts or executes source. The client retains a captured base through conflicts. A reviewed React/Node starter and pinned lockfile are stored as source only. Generic source has no static preview or generation controls; existing queued runs retain their progress and cancellation UI. See PROJECT-WORKSPACE.md. The application execution boundary, full-stack model orchestration and database provisioning remain separate future work.

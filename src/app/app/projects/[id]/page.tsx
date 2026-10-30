@@ -35,6 +35,14 @@ export default async function Studio({
   const project = projects.get(user.id, id);
   if (!project) notFound();
   const messages = projects.messages(user.id, id);
+  const latestSource = sourceVersions.latest(user.id, id);
+  const runs = generationJobs.runs(user.id, id);
+  const staticSource =
+    !latestSource ||
+    latestSource.files.length === 0 ||
+    (latestSource.files.length === 2 &&
+      latestSource.files.some((file) => file.path === "index.html") &&
+      latestSource.files.some((file) => file.path === "styles.css"));
   return (
     <main className="studio">
       {q.created === "1" && <ClearCreatedDraft brief={project.brief} />}
@@ -47,6 +55,13 @@ export default async function Studio({
           <span className="header-divider" />
           <h1>{project.name}</h1>
           <span className="pill">{ar ? "مسودة" : "Draft"}</span>
+          <Link
+            className="button ghost small"
+            href={`/app/projects/${id}/files`}
+          >
+            <FileText size={15} aria-hidden="true" />
+            {ar ? "ملفات المشروع" : "Project files"}
+          </Link>
         </div>
         <span className="saved-state">
           <Check size={14} />
@@ -145,18 +160,48 @@ export default async function Studio({
               <h3>{ar ? "الوصف الأساسي" : "The brief"}</h3>
               <p>{project.brief}</p>
             </section>
-            <GenerationPanel
-              key={id}
-              projectId={id}
-              ar={ar}
-              configured={generationConfigured()}
-              model={inferenceConfig().model}
-              provider={inferenceConfig().provider}
-              initialRuns={generationJobs.runs(user.id, id)}
-              initialVersions={sourceVersions
-                .list(user.id, id)
-                .map(sourceMetadata)}
-            />
+            {staticSource ? (
+              <GenerationPanel
+                key={id}
+                projectId={id}
+                ar={ar}
+                configured={generationConfigured()}
+                model={inferenceConfig().model}
+                provider={inferenceConfig().provider}
+                initialRuns={runs}
+                initialVersions={sourceVersions
+                  .list(user.id, id)
+                  .map(sourceMetadata)}
+              />
+            ) : (
+              <section className="outline-brief">
+                <h3>{ar ? "مشروع متعدد الملفات" : "Multi-file project"}</h3>
+                <p>
+                  {ar
+                    ? "ملفات الواجهة والخادم محفوظة بإصدارات. افتح مساحة الملفات للتحرير والاستعادة والتصدير. توليد الذكاء الاصطناعي الحالي يدعم HTML وCSS فقط؛ بناء هذا المشروع ومعاينته ينتظران بيئة التنفيذ المعزولة."
+                    : "Frontend and server source is saved in versions. Open the file workspace to edit, restore and export it. AI generation currently supports HTML and CSS only; building and previewing this project await the isolated execution environment."}
+                </p>
+                <Link
+                  className="button primary small"
+                  href={`/app/projects/${id}/files`}
+                >
+                  {ar ? "افتح مساحة الملفات" : "Open file workspace"}
+                </Link>
+              </section>
+            )}
+            {!staticSource && runs.length > 0 && (
+              <GenerationPanel
+                key={id}
+                projectId={id}
+                ar={ar}
+                configured={generationConfigured()}
+                model={inferenceConfig().model}
+                provider={inferenceConfig().provider}
+                initialRuns={runs}
+                initialVersions={[]}
+                runsOnly
+              />
+            )}
             <div className="project-details">
               <span>{ar ? "آخر تحديث" : "Last updated"}</span>
               <time dateTime={project.updated_at}>

@@ -26,6 +26,22 @@ const commitInput = z
     changes: z.array(changeInput).min(1).max(SOURCE_LIMITS.files),
   })
   .strict();
+const replaceInput = z
+  .object({
+    baseVersionId: z.uuid().nullable(),
+    summary: z.string().trim().min(1).max(240),
+    files: z
+      .array(
+        z
+          .object({
+            path: pathInput,
+            content: z.string().max(SOURCE_LIMITS.fileBytes),
+          })
+          .strict(),
+      )
+      .max(SOURCE_LIMITS.files),
+  })
+  .strict();
 const restoreInput = z
   .object({
     baseVersionId: z.string().uuid().nullable(),
@@ -164,10 +180,17 @@ export function sourceVersionStore(db: Database.Database) {
     for (const file of files) {
       validateSourcePath(file.path);
       const canonical = file.path.toLowerCase();
-      if (names.has(canonical))
+      if (
+        [...names].some(
+          (name) =>
+            name === canonical ||
+            name.startsWith(canonical + "/") ||
+            canonical.startsWith(name + "/"),
+        )
+      )
         throw new SourceVersionError(
           "INVALID_CHANGE",
-          "Paths must be unique, including letter case.",
+          "Paths must be unique and cannot conflict with directories, including letter case.",
         );
       names.add(canonical);
       const size = Buffer.byteLength(file.content, "utf8");
@@ -310,6 +333,18 @@ export function sourceVersionStore(db: Database.Database) {
             [...files].map(([path, content]) => ({ path, content })),
             parsed.summary,
           );
+        })
+        .immediate();
+    },
+    /** One full snapshot, including case-only renames and complete 200-file replacement. */
+    replace(owner: string, project: string, input: unknown): SourceVersion {
+      authorize(owner, project);
+      const parsed = replaceInput.parse(input);
+      return db
+        .transaction(() => {
+          authorize(owner, project);
+          const current = checkBase(project, parsed.baseVersionId);
+          return save(project, current, parsed.files, parsed.summary);
         })
         .immediate();
     },

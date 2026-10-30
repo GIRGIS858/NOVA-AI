@@ -182,6 +182,42 @@ test("queued HTTP work survives navigation, runs in a separate worker, and cance
       path: "/tmp/nova-worker-progress-mobile.png",
       fullPage: true,
     });
+    // A project can become multi-file while an already accepted static job waits.
+    // Its progress/cancellation must remain available without opening static previews.
+    const fullstackProject = projectStore(db).create(user.id, {
+      name: "Conversion during queued work",
+      brief: "Preserve job cancellation after creating a full-stack template.",
+    });
+    const fullstackBase = `${origin}/api/projects/${fullstackProject}`;
+    expect(
+      (
+        await page.request.post(`${fullstackBase}/generate`, {
+          headers: { Origin: origin },
+          data: { requestId: randomUUID() },
+        })
+      ).status(),
+    ).toBe(202);
+    expect(
+      (
+        await page.request.post(`${fullstackBase}/workspace/template`, {
+          headers: { Origin: origin },
+          data: { baseVersionId: null },
+        })
+      ).status(),
+    ).toBe(201);
+    await page.goto(`${origin}/app/projects/${fullstackProject}`);
+    await expect(
+      page.getByRole("heading", { name: "Multi-file project", exact: true }),
+    ).toBeVisible();
+    await expect(page.locator(".generation-live")).toHaveText("Queued");
+    await expect(page.locator("iframe.generation-preview")).toHaveCount(0);
+    await expect(
+      page.getByRole("button", { name: "Generate a new version", exact: true }),
+    ).toHaveCount(0);
+    await page
+      .getByRole("button", { name: "Cancel attempt", exact: true })
+      .click();
+    await expect(page.locator(".generation-live")).toHaveText("Cancelled");
   } finally {
     db?.close();
     server.kill("SIGTERM");

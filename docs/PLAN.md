@@ -91,7 +91,8 @@ Source-aware context checkpoint: 113 unit tests, all 7 browser workflows, TypeSc
 - [x] Provider-aware Arabic/English disclosure and local activation instructions.
 - [ ] Real model smoke and bilingual benchmark on the user's computer.
 - [x] Durable orchestration worker and persisted progress events before full-stack execution.
-- [ ] Multi-file full-stack project foundation and isolated build runner.
+- [x] Multi-file source workspace and reviewed React/Node starter.
+- [ ] Isolated application builds and full-stack AI editing.
 
 ## Durable generation worker — 30 October 2026
 
@@ -99,4 +100,13 @@ Source-aware context checkpoint: 113 unit tests, all 7 browser workflows, TypeSc
 - [x] Separate worker command, exclusive claim tokens, idempotency and persisted phase history.
 - [x] Queued/claimed cancellation, expiry and deletion-safe concurrency accounting without automatic provider retries.
 - [x] Real worker CLI validation plus a separate-process browser workflow with fixture model output.
-- [ ] Extend the static project format toward multi-file full-stack projects and isolated build execution.
+- [x] Extend the source workspace to multi-file full-stack projects.
+- [ ] Implement isolated build execution.
+
+## Multi-file workspace — 30 October 2026
+
+- [x] Nested source tree, create/edit/rename/delete, immutable full snapshots and owner-scoped history restoration.
+- [x] Captured-base conflicts preserve drafts; complete saved ZIP and draft JSON exports.
+- [x] Reviewed React/Vite + Node starter with dependency lockfile, tested API and real frontend/API round trip.
+- [x] Static generation remains available for static projects; existing task progress/cancellation remains visible after multi-file conversion.
+- [ ] Full-stack model output, isolated install/build/preview, persistent application database and deployment.

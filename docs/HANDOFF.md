@@ -41,8 +41,8 @@ Run `npm run ai:smoke` (one free-only request consuming quota), then set `NOVA_A
 
 ## Next work
 
-1. Extend the workspace toward a supported multi-file full-stack project template, preserving version/ownership limits and explicit unsupported execution states.
-2. Introduce a separately isolated application build runner with resource/network limits and real preview readiness. The new generation worker does not execute generated source.
+1. Introduce a separately isolated application build runner for the new multi-file workspace, with resource/network limits, install/build/test jobs tied to immutable versions and real preview readiness. The generation worker does not execute generated source.
+2. Extend structured AI operations to multi-file edits only after context, patch validation and execution boundaries are in place. The bundled React/Node starter currently uses JavaScript and in-memory notes; TypeScript and PostgreSQL provisioning remain planned.
 3. Validate local Ollama inference and bilingual edit quality on the user's 16 GB RAM / RTX 5070 machine. No external provider key is required for that workflow.
 4. Extend orchestration with bounded planning/repair steps and streaming events; coordinate any longer inference deadlines with lease recovery.
 5. PostgreSQL, application data provisioning, deployment, teams, email verification/recovery and production operations remain on PLATFORM-ROADMAP.md.
@@ -98,3 +98,17 @@ A retained attempt deadline survives project/job deletion, including jobs claime
 Start the app and `npm run worker` from the same checkout with the same private database/configuration after migrations. See GENERATION-WORKER.md. The actual worker CLI was tested against a disposable database: it reconciled expired jobs while inference was disabled, then exited cleanly on SIGTERM. The browser workflow accepted a real HTTP job, reloaded the page, executed a fixture provider in a separate worker process, and verified persisted source, stages and cancellation. Fixtures are not actual local model inference.
 
 Checkpoint validation: type checks, 156 unit/integration tests, production build, repeatable migrations and all 8 browser workflows. Local model smoke remains pending because this cloud machine has no Ollama model/GPU. Saved environment startup instructions now include the worker; draft saving is not environment publication.
+
+## Latest milestone — multi-file project workspace (30 October 2026)
+
+Continued from GitHub main `bb61fda`. Project studios now link to an owner-scoped Arabic/English file workspace. Users browse nested source, create/edit/rename/delete files, save a complete immutable snapshot, inspect history, restore it as a new version and download either an unsaved JSON draft or a complete saved ZIP. The UI retains the captured base and draft through stale-save rejection, prevents editing before a successful initial load and confirms dirty link navigation/reloads. Drafts remain page memory; save/download before leaving, including browser history navigation.
+
+`sourceVersionStore.replace` shares canonical transaction/ownership/base/limit checks and supports complete 200-file replacement and case-only renames. Snapshot and ZIP validation reject file/directory prefix collisions. The service and HTTP routes bound source/request sizes and expose safe error codes. ZIP output uses stored regular-file entries and CRC32, never extraction or execution. Its interoperability tests use Python3's standard ZIP reader with a timeout; Python3 is test-only, not an application runtime dependency.
+
+An empty project can initialize the reviewed React/Vite + Node HTTP starter. Ten source files include a pinned npm lockfile, README and API test. Vite is pinned to 7.3.7. The starter was validated separately using Node22 `npm ci`, an actual HTTP API test, production build and Chromium frontend→API note-save/reload plus mobile layout. Notes are in-memory and vanish on API restart. The template currently uses JavaScript; TypeScript and persistent application storage remain future milestones. Edited/generated source is never run by Nova.
+
+Multi-file studios disclose that static AI generation/preview cannot operate on them. Existing queued jobs still show progress/cancellation after conversion to multi-file source, and captured-base fencing prevents stale publication. Deleting all files leaves a valid empty snapshot from which the static editor can create a fresh HTML/CSS pair. Manual actions consume no AI quota. See PROJECT-WORKSPACE.md.
+
+Validation: 200 unit/integration tests, TypeScript and production build passed. All 10 browser workflows passed across the full run and focused reruns: the initial new workflow exposed two test assumptions (a Next route announcer sharing role=alert and streamed not-found pages returning HTTP200); scoped UI assertions now verify the actual error/not-found content while JSON APIs still require 404. Browser coverage includes full CRUD/export/restore, repeated stale saves, retained JSON base, cross-owner/origin denial, failed initial loads, empty-source recovery, queue cancellation after template creation and Arabic/English mobile layout. The mobile workspace screenshot was visually reviewed.
+
+No live model inference or full-stack application execution inside Nova is claimed. The next engineering boundary is the separately isolated install/build/test/preview runner, followed by bounded multi-file AI edits and application data provisioning. Existing local setup and web/worker startup instructions remain applicable; no environment publication was performed.

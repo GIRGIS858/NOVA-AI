@@ -13,10 +13,10 @@ export async function GET(
   if (auth.response) return auth.response;
   try {
     const version = sourceVersions.get(auth.owner!, id, versionId);
-    const files = validateFiles(version.files);
+    const files = version.files.length ? validateFiles(version.files) : [];
     return json({
       version: { ...sourceMetadata(version), files },
-      preview: buildPreview(files),
+      preview: files.length ? buildPreview(files) : "",
     });
   } catch (error) {
     if (error instanceof SourceVersionError && error.code === "NOT_FOUND")
