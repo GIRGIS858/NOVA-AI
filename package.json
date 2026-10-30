@@ -15,7 +15,8 @@
     "test:e2e": "playwright test",
     "db:migrate": "tsx scripts/migrate.ts",
     "setup:local": "node scripts/setup-local.mjs && npm run db:migrate",
-    "ai:smoke": "tsx scripts/ai-smoke.ts"
+    "ai:smoke": "tsx scripts/ai-smoke.ts",
+    "worker": "tsx scripts/generation-worker.ts"
   },
   "dependencies": {
     "@fontsource/dm-sans": "^5.3.0",

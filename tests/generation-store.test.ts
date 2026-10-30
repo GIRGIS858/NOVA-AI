@@ -45,7 +45,7 @@ describe("generation reservation and version ownership", () => {
     expect(store.getRun("alice", run.id, now)?.status).toBe("running");
     expect(
       db.prepare("SELECT COUNT(*) AS count FROM nova_schema_migrations").get(),
-    ).toEqual({ count: 1 });
+    ).toEqual({ count: 4 });
   });
   it("scopes reservation, transitions, runs and files to the authenticated owner", () => {
     const id = project();

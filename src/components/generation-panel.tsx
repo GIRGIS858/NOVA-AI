@@ -13,7 +13,11 @@ import {
   Square,
 } from "lucide-react";
 
+type JobPhase =
+  "queued" | "generating" | "validating" | "succeeded" | "failed" | "cancelled";
 type Run = {
+  phase?: JobPhase;
+  events?: Array<{ phase: JobPhase; created_at: number }>;
   id: string;
   status: "running" | "succeeded" | "failed" | "cancelled";
   error_code: string | null;
@@ -45,6 +49,10 @@ function errorText(code: string, ar: boolean) {
       return ar
         ? "التوليد غير مهيّأ بعد. جهّز النموذج المحدد واختبره قبل تفعيل التوليد."
         : "Generation is not configured yet. Prepare and validate the selected model before enabling generation.";
+    case "configuration_changed":
+      return ar
+        ? "تغيّر إعداد النموذج منذ إضافة المهمة. راجع الإعدادات ثم ابدأ محاولة جديدة."
+        : "The model configuration changed after enqueue. Review settings and start a new attempt.";
     case "local_model_unavailable":
       return ar
         ? "النموذج المحلي غير متاح. شغّل Ollama وتأكد من تنزيل النموذج على جهاز الخادم."
@@ -103,8 +111,8 @@ function errorText(code: string, ar: boolean) {
         : "The attempt timed out or was interrupted. No new version was saved; you can start another attempt.";
     case "cancelled":
       return ar
-        ? "أُلغيت المحاولة. قد تبقى محسوبة ضمن حصة المزوّد المجانية."
-        : "The attempt was cancelled. It may still count against the provider’s free quota.";
+        ? "أُلغيت المحاولة. تبقى محسوبة ضمن حد المحاولات."
+        : "The attempt was cancelled. It still counts toward the attempt limit.";
     case "context_limit":
       return ar
         ? "حجم وصف المشروع وملفاته يتجاوز حد طلب AI. لم نرسل ملفات ناقصة؛ قلّل الحجم أو تابع بالمحرّر اليدوي."
@@ -188,6 +196,9 @@ export function GenerationPanel({
   const [sourceNotice, setSourceNotice] = useState("");
   const requestInFlight = useRef(false);
   const historyInFlight = useRef<Promise<HistoryResponse> | null>(null);
+  const hadActiveRun = useRef(
+    initialRuns.some((run) => run.status === "running"),
+  );
   const active = runs.find((run) => run.status === "running");
   const base = `/api/projects/${encodeURIComponent(projectId)}`;
 
@@ -201,6 +212,12 @@ export function GenerationPanel({
       historyInFlight.current = request;
       try {
         const result = await request;
+        const justFinished =
+          hadActiveRun.current &&
+          !result.runs.some((run) => run.status === "running");
+        hadActiveRun.current = result.runs.some(
+          (run) => run.status === "running",
+        );
         setRuns(result.runs);
         setVersions(result.versions);
         setReady(result.configured);
@@ -208,6 +225,7 @@ export function GenerationPanel({
         setCurrentProvider(result.provider);
         setSelected((current) =>
           preferLatest ||
+          justFinished ||
           !result.versions.some((version) => version.id === current)
             ? result.versions[0]?.id || ""
             : current,
@@ -398,6 +416,15 @@ export function GenerationPanel({
       dateStyle: "short",
       timeStyle: "short",
     }).format(new Date(value));
+  const phaseLabel = (phase: JobPhase) =>
+    ({
+      queued: ar ? "بانتظار التنفيذ" : "Queued",
+      generating: ar ? "قيد التوليد" : "Generating",
+      validating: ar ? "جارٍ التحقق من الملفات" : "Validating files",
+      succeeded: ar ? "نسخة محفوظة" : "Version saved",
+      failed: ar ? "لم تكتمل" : "Failed",
+      cancelled: ar ? "ملغاة" : "Cancelled",
+    })[phase];
   const statusLabel = (status: Run["status"]) =>
     ({
       running: ar ? "قيد التوليد" : "Generating",
@@ -502,13 +529,18 @@ export function GenerationPanel({
       )}
       <div className="generation-live" role="status" aria-live="polite">
         {active
-          ? ar
-            ? "المحاولة جارية. يمكنك إلغاؤها؛ قد تبقى محسوبة ضمن الحصة المجانية."
-            : "An attempt is running. You can cancel it; it may still count against the free quota."
+          ? phaseLabel(active.phase || "generating")
           : runs[0]
             ? statusLabel(runs[0].status)
             : ""}
       </div>
+      {active && (
+        <p className="generation-preview-note">
+          {ar
+            ? "المهمة محفوظة وتستمر بعد إغلاق الصفحة. يمكنك العودة لمتابعتها أو إلغائها."
+            : "This saved task continues after you close the page. Return to follow progress or cancel it."}
+        </p>
+      )}
 
       <div className="generation-actions">
         <button
@@ -749,12 +781,32 @@ export function GenerationPanel({
               <li key={run.id}>
                 <div>
                   <span className={`generation-run-status run-${run.status}`}>
-                    {statusLabel(run.status)}
+                    {run.status === "running"
+                      ? phaseLabel(run.phase || "generating")
+                      : statusLabel(run.status)}
                   </span>
                   <time dateTime={new Date(run.created_at).toISOString()}>
                     {date(run.created_at)}
                   </time>
                 </div>
+                {run.events && run.events.length > 0 && (
+                  <ol
+                    className="generation-events"
+                    aria-label={ar ? "مراحل المهمة" : "Task progress"}
+                  >
+                    {run.events.map((event, index) => (
+                      <li key={index}>
+                        <span>{phaseLabel(event.phase)}</span>
+                        {" · "}
+                        <time
+                          dateTime={new Date(event.created_at).toISOString()}
+                        >
+                          {date(event.created_at)}
+                        </time>
+                      </li>
+                    ))}
+                  </ol>
+                )}
                 {run.error_code && <p>{errorText(run.error_code, ar)}</p>}
               </li>
             ))}

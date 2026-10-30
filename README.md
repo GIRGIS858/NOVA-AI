@@ -12,6 +12,7 @@ A new Arabic/English platform for building websites through conversation. This r
 - Manual HTML/CSS editor with immutable saves, version restoration, and preserved on-page drafts when another session changes the source. No AI key is needed for manual editing.
 - Product status and milestone documentation.
 - Immutable source snapshots with ownership, concurrency checks and resource limits, now integrated with generation runs.
+- Durable generation queue with a separate worker, saved stages, cancellation and bounded crash recovery.
 - Local Ollama inference without provider keys, with bounded structured output, cancellation and immutable source snapshots. The legacy free-only OpenRouter adapter is explicit opt-in only. Live generation stays disabled until validated.
 
 **Not implemented:** JavaScript/full-stack execution, isolated application build workers, public deployment, shared teams, credits, payments, email verification, and password recovery. Real local inference has not been validated here because this cloud machine has no Ollama model or GPU. Do not use this development release for sensitive data or public production signups.
@@ -24,6 +25,8 @@ Use Node.js 22. From this repository:
 npm ci
 npm run setup:local
 npm run dev
+# In another terminal, from the same checkout:
+npm run worker
 ```
 
 `setup:local` generates a private session secret on first use and runs schema migrations. It preserves an existing `.env.local`. Do not commit or share that file. Configure `BETTER_AUTH_URL` to the exact application origin; its local default is `http://localhost:3000`.
@@ -38,6 +41,8 @@ For a production-mode local check:
 ```sh
 npm run build
 npm start
+# In another terminal:
+npm run worker
 ```
 
 The managed environment has Node 22 at `/workspace/toolchains/node22/node_modules/node/bin`; prepend this directory to PATH when needed. Each cloud task is isolated; use this checkout and do not create additional worktrees unless requested.
@@ -74,6 +79,10 @@ Use **Add files manually** in a project to create HTML/CSS without an AI key. Sa
 
 See [generation boundaries and validation](docs/GENERATION.md) and [source editor behavior](docs/SOURCE-VERSIONS.md).
 
+## Background generation
+
+Run `npm run worker` alongside the web server when generation is enabled. Requests return a queued job immediately; work continues after page closure. The studio shows persisted waiting/generation/validation stages. Queued work survives a restart for up to ten minutes; expired or interrupted inference is marked failed and is never automatically repeated. See [worker startup and recovery](docs/GENERATION-WORKER.md). This worker orchestrates the model and validates HTML/CSS; full-stack source execution still requires a separate isolation boundary.
+
 ## Storage and migrations
 
 SQLite is the local foundation database (`data/nova.sqlite`, override with `NOVA_DATABASE_PATH`). Its files contain private account and project data; protect and back them up appropriately. Projects use parameterized statements, explicit ownership filters, transactions for notes, and cascading note deletion.
@@ -96,7 +105,7 @@ Browser tests start a separate production-mode server on port 3100 with a random
 
 Playwright uses `/usr/bin/chromium` when available in this local cloud image, otherwise its bundled browser. Run `npx playwright install chromium` on other machines, or set `CHROMIUM_PATH` to an explicit compatible executable. CI installs Chromium and system dependencies automatically.
 
-The E2E suite uses persisted fixture artifacts for generation UI/security checks; it never calls the live provider. It also checks signup, login, project persistence, notes after reload, cross-user rejection, signout, confirmed deletion and cancellation, locale persistence, and mobile horizontal overflow on the home, dashboard, and studio screens. Screenshots and failure traces are written under ignored `test-results/`, with an HTML report under `playwright-report/`. Test databases remain under `data/e2e/` for local debugging and may be removed after the test server stops.
+The E2E suite includes a separate-process queued-generation fixture and uses persisted fixture artifacts for generation UI/security checks; it never calls the live provider. It also checks signup, login, project persistence, notes after reload, cross-user rejection, signout, confirmed deletion and cancellation, locale persistence, and mobile horizontal overflow on the home, dashboard, and studio screens. Screenshots and failure traces are written under ignored `test-results/`, with an HTML report under `playwright-report/`. Test databases remain under `data/e2e/` for local debugging and may be removed after the test server stops.
 
 GitHub Actions runs type checks, unit tests, a production build, and browser workflows for pushes to `main` and pull requests. It generates ephemeral credentials during execution; no account secrets are stored in the workflow.
 

@@ -32,6 +32,6 @@ The user now requires locally hosted AI without external provider subscriptions 
 
 ## Current checkpoint and next session
 
-Implemented the local Ollama adapter and default provider selection, reusing existing ownership, cancellation, immutable snapshots and artifact validation. Local generation still produces HTML/CSS only. No real model inference or quality benchmark has run in the cloud environment. Complete the hardware smoke check next, then build durable job execution and events. The existing 90-second generation deadline and attempt limits remain; change these together with lease recovery and resource controls, not in isolation.
+Implemented the local Ollama adapter and default provider selection, reusing existing ownership, cancellation, immutable snapshots and artifact validation. Local generation still produces HTML/CSS only. No real model inference or quality benchmark has run in the cloud environment. Durable job execution and phase events are now implemented; see GENERATION-WORKER.md. Complete the hardware smoke check next, then extend the project format toward multi-file full-stack projects and a separately isolated build runner. The existing 90-second generation deadline and attempt limits remain; change these together with lease recovery and resource controls, not in isolation.
 
 Each session should finish a tested vertical slice and update HANDOFF.md. Work resumes in explicit sessions; this document is not a promise of unattended development over months.

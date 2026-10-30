@@ -66,6 +66,8 @@ const filesSchema = z
   .refine((files) => new Set(files.map((f) => f.path)).size === 2);
 const failureCodes = new Set([
   "not_configured",
+  "local_model_unavailable",
+  "configuration_changed",
   "free_model_required",
   "free_model_unavailable",
   "catalog_unavailable",
@@ -144,6 +146,99 @@ export function migrateGeneration(db: Database.Database) {
       Date.now(),
     );
   }).immediate();
+  db.transaction(() => {
+    if (
+      db
+        .prepare("SELECT 1 FROM nova_schema_migrations WHERE version = ?")
+        .get("generation-queue-v1")
+    )
+      return;
+    db.exec(`
+      CREATE TABLE generation_jobs (
+        run_id TEXT PRIMARY KEY REFERENCES generation_runs(id) ON DELETE CASCADE,
+        payload_json TEXT,
+        provider TEXT NOT NULL,
+        model TEXT NOT NULL,
+        phase TEXT NOT NULL CHECK(phase IN ('queued','generating','validating','succeeded','failed','cancelled')),
+        token TEXT,
+        expires_at INTEGER NOT NULL,
+        created_at INTEGER NOT NULL
+      );
+      CREATE INDEX generation_jobs_pending ON generation_jobs(phase, created_at);
+      CREATE TABLE generation_events (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        run_id TEXT NOT NULL REFERENCES generation_runs(id) ON DELETE CASCADE,
+        phase TEXT NOT NULL,
+        created_at INTEGER NOT NULL
+      );
+      CREATE INDEX generation_events_run ON generation_events(run_id, id);
+    `);
+    db.prepare("INSERT INTO nova_schema_migrations VALUES (?, ?)").run(
+      "generation-queue-v1",
+      Date.now(),
+    );
+  }).immediate();
+  db.transaction(() => {
+    if (
+      db
+        .prepare("SELECT 1 FROM nova_schema_migrations WHERE version = ?")
+        .get("generation-attempt-leases-v1")
+    )
+      return;
+    db.exec(
+      "ALTER TABLE generation_attempts ADD COLUMN lease_expires_at INTEGER",
+    );
+    db.prepare(
+      `UPDATE generation_attempts SET lease_expires_at = COALESCE(
+      (SELECT expires_at FROM generation_jobs j WHERE j.run_id = generation_attempts.run_id), created_at + ?)`,
+    ).run(GENERATION_LIMITS.leaseMs);
+    db.prepare("INSERT INTO nova_schema_migrations VALUES (?, ?)").run(
+      "generation-attempt-leases-v1",
+      Date.now(),
+    );
+  }).immediate();
+  db.transaction(() => {
+    if (
+      db
+        .prepare("SELECT 1 FROM nova_schema_migrations WHERE version = ?")
+        .get("generation-queued-delete-release-v1")
+    )
+      return;
+    db.exec(`CREATE TRIGGER generation_release_unclaimed_before_project_delete
+      BEFORE DELETE ON projects BEGIN
+        UPDATE generation_attempts SET finished_at = COALESCE(finished_at, CAST(strftime('%s','now') AS INTEGER) * 1000)
+        WHERE run_id IN (SELECT j.run_id FROM generation_jobs j JOIN generation_runs r ON r.id = j.run_id
+          WHERE r.project_id = OLD.id AND j.token IS NULL);
+      END`);
+    db.prepare("INSERT INTO nova_schema_migrations VALUES (?, ?)").run(
+      "generation-queued-delete-release-v1",
+      Date.now(),
+    );
+  }).immediate();
+}
+
+/** Reconcile expired jobs without retrying ambiguous provider work. */
+export function expireGenerationRuns(db: Database.Database, now: number) {
+  db.transaction(() => {
+    db.prepare(
+      `UPDATE generation_runs SET status = 'failed', error_code = 'interrupted', finished_at = ?
+      WHERE status = 'running' AND COALESCE((SELECT expires_at FROM generation_jobs j WHERE j.run_id = generation_runs.id), created_at + ?) <= ?`,
+    ).run(now, GENERATION_LIMITS.leaseMs, now);
+    db.prepare(
+      `UPDATE generation_attempts SET finished_at = ? WHERE finished_at IS NULL
+      AND COALESCE(lease_expires_at, created_at + ?) <= ?`,
+    ).run(now, GENERATION_LIMITS.leaseMs, now);
+    db.prepare(
+      `INSERT INTO generation_events(run_id, phase, created_at)
+      SELECT j.run_id, r.status, COALESCE(r.finished_at, ?) FROM generation_jobs j JOIN generation_runs r ON r.id = j.run_id
+      WHERE r.status <> 'running' AND j.phase <> r.status`,
+    ).run(now);
+    db.prepare(
+      `UPDATE generation_jobs SET payload_json = NULL, phase = (SELECT status FROM generation_runs WHERE id = run_id)
+      WHERE (payload_json IS NOT NULL OR phase NOT IN ('succeeded','failed','cancelled'))
+      AND run_id IN (SELECT id FROM generation_runs WHERE status <> 'running')`,
+    ).run();
+  }).immediate();
 }
 
 /** Single-instance SQLite store; the reservation transaction serializes all writers. */
@@ -155,14 +250,7 @@ export function generationStore(db: Database.Database) {
         .prepare("SELECT 1 FROM projects WHERE id = ? AND owner_id = ?")
         .get(projectId, owner),
     );
-  const expire = (now: number) => {
-    db.prepare(
-      "UPDATE generation_runs SET status = 'failed', error_code = 'interrupted', finished_at = ? WHERE status = 'running' AND created_at <= ?",
-    ).run(now, now - GENERATION_LIMITS.leaseMs);
-    db.prepare(
-      "UPDATE generation_attempts SET finished_at = ? WHERE finished_at IS NULL AND created_at <= ?",
-    ).run(now, now - GENERATION_LIMITS.leaseMs);
-  };
+  const expire = (now: number) => expireGenerationRuns(db, now);
   const findRun = (owner: string, runId: string) =>
     db
       .prepare(
@@ -267,7 +355,7 @@ export function generationStore(db: Database.Database) {
           VALUES (@id, @project_id, @owner_id, @request_id, @base_version_id, @generated_version_id, @status, @error_code, @created_at, @finished_at)`,
           ).run(run);
           db.prepare(
-            "INSERT INTO generation_attempts VALUES (?, ?, ?, ?, ?, NULL)",
+            "INSERT INTO generation_attempts(owner_id, request_id, project_id, run_id, created_at, finished_at) VALUES (?, ?, ?, ?, ?, NULL)",
           ).run(owner, requestId, projectId, run.id, now);
           // Capture the exact files under the same lock as base_version_id.
           // Only the worker receives this context; public run responses omit it.

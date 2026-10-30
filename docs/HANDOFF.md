@@ -41,10 +41,11 @@ Run `npm run ai:smoke` (one free-only request consuming quota), then set `NOVA_A
 
 ## Next work
 
-1. Source comparison is implemented (see the milestone below). Next, add a focused changed-lines view and a downloadable comparison for larger source histories.
-2. Once the key is provided, validate actual inference and compare free models on Arabic/English site quality. Keep it disabled until validated.
-3. Add a separately isolated worker for generated JavaScript/full-stack builds, resource/network policies and verified readiness. Never execute generated code inside the Next.js process.
-4. Billing, shared teams, publication, email verification/recovery, backups, operational controls and production hardening remain planned.
+1. Extend the workspace toward a supported multi-file full-stack project template, preserving version/ownership limits and explicit unsupported execution states.
+2. Introduce a separately isolated application build runner with resource/network limits and real preview readiness. The new generation worker does not execute generated source.
+3. Validate local Ollama inference and bilingual edit quality on the user's 16 GB RAM / RTX 5070 machine. No external provider key is required for that workflow.
+4. Extend orchestration with bounded planning/repair steps and streaming events; coordinate any longer inference deadlines with lease recovery.
+5. PostgreSQL, application data provisioning, deployment, teams, email verification/recovery and production operations remain on PLATFORM-ROADMAP.md.
 
 ## Starting another session
 
@@ -85,3 +86,15 @@ The user's machine can start benchmarking a 7B quantized coding model; qwen2.5-c
 Next: complete the local hardware smoke/benchmark, then implement durable jobs with persisted progress, cancellation and lease recovery. Continue from PLATFORM-ROADMAP.md toward isolated full-stack builds, application data and deployment. The current generator still supports HTML/CSS only.
 
 Validation for this checkpoint: type checking, all 137 unit tests (including an ephemeral real-HTTP fixture runtime), production build and all 7 browser workflows passed. The actual `ai:smoke` command was attempted with local provider/model selection and failed because the cloud environment has no reachable local model runtime; no real generation success is claimed. Saved startup instructions were updated in the environment draft for local-first operation; they were not published. The existing install script remains applicable.
+
+## Latest milestone — durable generation worker (30 October 2026)
+
+Generation now returns a persisted queued job (HTTP 202; idempotent replay 200). Captured source, requirements, provider/model and reservation are written atomically. `npm run worker` performs generation in a separate Node process, so browser disconnection does not cancel accepted work. The studio displays queued/generating/validating/terminal stages in Arabic/English and follows the newly saved version after completion. Provider output still supports HTML/CSS only and is never executed.
+
+Claim tokens and immediate SQLite transactions prevent duplicate claims and stale publication. Queued jobs wait up to ten minutes; claiming grants a fresh 120-second lease around a 90-second inference deadline. Expired/crashed work is marked interrupted, with no automatic retry of ambiguous provider calls. Private job payloads are cleared at settlement; status events contain only phases/timestamps. Provider configuration changes fail safely instead of rerouting private data.
+
+A retained attempt deadline survives project/job deletion, including jobs claimed after a long queue wait. Deleting an unclaimed job releases its slot atomically through a project-deletion trigger; claimed jobs hold their slot until worker acknowledgement or deadline. Migrations are additive and were checked for repeatability. Tests cover independent connections, database reopening, cancellation, source conflicts, malformed artifacts, deletion/lease races and safe local-provider failures.
+
+Start the app and `npm run worker` from the same checkout with the same private database/configuration after migrations. See GENERATION-WORKER.md. The actual worker CLI was tested against a disposable database: it reconciled expired jobs while inference was disabled, then exited cleanly on SIGTERM. The browser workflow accepted a real HTTP job, reloaded the page, executed a fixture provider in a separate worker process, and verified persisted source, stages and cancellation. Fixtures are not actual local model inference.
+
+Checkpoint validation: type checks, 156 unit/integration tests, production build, repeatable migrations and all 8 browser workflows. Local model smoke remains pending because this cloud machine has no Ollama model/GPU. Saved environment startup instructions now include the worker; draft saving is not environment publication.

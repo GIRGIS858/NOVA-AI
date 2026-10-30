@@ -1,4 +1,4 @@
-import { generations } from "@/lib/db";
+import { generations, generationJobs } from "@/lib/db";
 import { authorizeProject, json, validOrigin } from "@/lib/generation-http";
 export const runtime = "nodejs";
 export async function POST(
@@ -11,6 +11,6 @@ export async function POST(
   if (auth.response) return auth.response;
   const run = generations.getRun(auth.owner!, runId);
   if (!run || run.project_id !== id) return json({ error: "unavailable" }, 404);
-  generations.cancel(auth.owner!, id, runId);
+  generationJobs.cancel(auth.owner!, id, runId);
   return json({ run: generations.getRun(auth.owner!, runId) });
 }

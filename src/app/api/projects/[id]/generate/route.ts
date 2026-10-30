@@ -1,14 +1,14 @@
 import { generationConfigured } from "@/lib/generation-config";
 import { z } from "zod";
-import { generations, projects } from "@/lib/db";
+import { generationJobs } from "@/lib/db";
+import { inferenceConfig } from "@/lib/inference-config";
 import {
   authorizeProject,
   json,
   smallJson,
   validOrigin,
 } from "@/lib/generation-http";
-import { generateStaticSite } from "@/lib/ai-provider";
-import { runGeneration } from "@/lib/run-generation";
+import { ProviderError } from "@/lib/provider-error";
 import { GenerationStoreError } from "@/lib/generation-store";
 export const runtime = "nodejs";
 export const maxDuration = 120;
@@ -29,21 +29,20 @@ export async function POST(
   } catch {
     return json({ error: "invalid_request" }, 400);
   }
-  const apiKey = process.env.NOVA_AI_API_KEY || "";
   if (!generationConfigured()) return json({ error: "not_configured" }, 503);
   try {
-    const result = await runGeneration(
-      {
-        owner: auth.owner!,
-        projectId: id,
-        requestId: input.requestId,
-        signal: request.signal,
-        apiKey,
-      },
-      { generations, projects, provider: generateStaticSite },
+    const result = generationJobs.enqueue(
+      auth.owner!,
+      id,
+      input.requestId,
+      inferenceConfig(),
     );
-    return json(result);
+    const run = generationJobs
+      .runs(auth.owner!, id)
+      .find((run) => run.id === result.run.id);
+    return json({ run: run || result.run }, result.existing ? 200 : 202);
   } catch (error) {
+    if (error instanceof ProviderError) return json({ error: error.code }, 422);
     if (error instanceof GenerationStoreError)
       return json(
         { error: error.code },

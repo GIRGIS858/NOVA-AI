@@ -12,7 +12,7 @@ import {
   CircleDashed,
 } from "lucide-react";
 import { requireUser } from "@/lib/auth";
-import { projects, generations, sourceVersions } from "@/lib/db";
+import { projects, generationJobs, sourceVersions } from "@/lib/db";
 import { sourceMetadata } from "@/lib/source-metadata";
 import { GenerationPanel } from "@/components/generation-panel";
 import { getLocale } from "@/lib/locale";
@@ -152,7 +152,7 @@ export default async function Studio({
               configured={generationConfigured()}
               model={inferenceConfig().model}
               provider={inferenceConfig().provider}
-              initialRuns={generations.runs(user.id, id)}
+              initialRuns={generationJobs.runs(user.id, id)}
               initialVersions={sourceVersions
                 .list(user.id, id)
                 .map(sourceMetadata)}

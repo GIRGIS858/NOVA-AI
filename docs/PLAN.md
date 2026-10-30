@@ -90,4 +90,13 @@ Source-aware context checkpoint: 113 unit tests, all 7 browser workflows, TypeSc
 - [x] Bounded schema output, whole-source/context rejection and shared artifact validation.
 - [x] Provider-aware Arabic/English disclosure and local activation instructions.
 - [ ] Real model smoke and bilingual benchmark on the user's computer.
-- [ ] Durable orchestration worker and persisted progress events before full-stack execution.
+- [x] Durable orchestration worker and persisted progress events before full-stack execution.
+- [ ] Multi-file full-stack project foundation and isolated build runner.
+
+## Durable generation worker — 30 October 2026
+
+- [x] Atomic persistent enqueue with captured requirements/source and provider/model identity.
+- [x] Separate worker command, exclusive claim tokens, idempotency and persisted phase history.
+- [x] Queued/claimed cancellation, expiry and deletion-safe concurrency accounting without automatic provider retries.
+- [x] Real worker CLI validation plus a separate-process browser workflow with fixture model output.
+- [ ] Extend the static project format toward multi-file full-stack projects and isolated build execution.

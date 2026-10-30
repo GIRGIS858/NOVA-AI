@@ -20,9 +20,9 @@ NOVA_AI_ENABLED=0
 ```
 
 5. Run `npm run ai:smoke`. It makes one actual generation, validates the two static files, builds a sanitized preview without executing source, and prints validation metadata only. A failure is not an activation success. Inspect `ollama ps` during the run to check memory/device placement.
-6. Only after a successful smoke check, set `NOVA_AI_ENABLED=1` and run `npm run dev` (or `npm run build` then `npm start`). Validate Arabic and English create/edit examples and record latency and preservation quality before choosing the final model.
+6. Only after a successful smoke check, set `NOVA_AI_ENABLED=1` and run `npm run dev` (or `npm run build` then `npm start`). Start `npm run worker` in another terminal in the same checkout; it uses the same private configuration/database. Validate Arabic and English create/edit examples and record latency and preservation quality before choosing the final model.
 
-The current local adapter requests 16,384 context tokens and at most 4,096 output tokens. It rejects messages above 10,000 UTF-8 bytes before any runtime request, leaving conservative room for output and the model template. It never silently drops source. Large contexts return a visible context-limit error. The existing run deadline is 90 seconds; a slow model may fail it. Longer jobs require the planned durable-worker/lease changes. Generation remains HTML/CSS until isolated full-stack execution is implemented.
+The current local adapter requests 16,384 context tokens and at most 4,096 output tokens. It rejects messages above 10,000 UTF-8 bytes before any runtime request, leaving conservative room for output and the model template. It never silently drops source. Large contexts return a visible context-limit error. The existing run deadline is 90 seconds; a slow model may fail it. Jobs are durable and run in a separate worker, but longer inference still requires coordinated deadline/lease changes; see GENERATION-WORKER.md. Generation remains HTML/CSS until isolated full-stack execution is implemented.
 
 ## Validation status
 
